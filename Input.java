@@ -26,8 +26,10 @@ public class Input {
 			output = new BufferedWriter(new FileWriter("output.txt"));
 			while((line = inputData.readLine()) != null) {
 				//vyresit komentare
-				//vyresit odstraneni vsech bilych znaku	
+				//vyresit odstraneni vsech bilych znaku
 				line = line.replaceAll("\\s+", " ");
+				line = line.replaceAll("❄", " ❄ ");
+				line = line.replaceAll("⛏", " ⛏ ");
 				sLine = line.split(" ");
 				for(int i = 0 ; i < sLine.length ; i++) {
 					if(sLine[i].contains(start)) {
@@ -55,16 +57,20 @@ public class Input {
 		if(!(index >= (sLine.length-1))) {
 			index++; 
 		}
+		//problem je ze nedokaze pozna dvojty konec --- ⛏⛏ bere jako že obsahuje kncici
+		//symbol ale v poli je to oboje na 1 indexu takze ukonoci pouze jednou
 		while(!sLine[index].contains(end)) {
 			if(sLine[index].contains(start)) {
 				index = comment(index)+1;
 			}
-			//sLine[index] = "##";
 			index++;
 			if(index > (sLine.length-1)) {
 				try {
 					if((line = inputData.readLine()) != null) {
-						sLine = line.replaceAll("\\s+", " ").split(" ");
+						line =  line.replaceAll("\\s+", " ");
+						line = line.replaceAll("❄", " ❄ ");
+						line = line.replaceAll("⛏", " ⛏ ");
+						sLine = line.split(" ");
 						index = 0;
 					}
 					else {
@@ -76,7 +82,6 @@ public class Input {
 				}
 			}
 		}
-		//System.out.println("Koment nasel");
 		return index;
 	}
 }
