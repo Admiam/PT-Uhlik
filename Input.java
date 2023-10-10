@@ -39,17 +39,17 @@ public class Input {
 	 * nazev vystupniho souboru
 	 */
 	private String output = "output.txt";
-
-
+	
+	
 	public Input() {
-
+		
 	}
-
+	
 	/**
-	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro
+	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro 
 	 * ziskani dat
 	 */
-	public void read() {
+	public void read() {		
 		try {
 			inputData = Files.newBufferedReader(Paths.get(input));
 			//inputData = Files.newBufferedReader(Paths.get("strangeL.txt"));
@@ -71,9 +71,9 @@ public class Input {
 							outputData.newLine();
 						}
 					}
-				}
+				}	
 			}
-			//TODO objekty z dat
+		//TODO objekty z dat
 			outputData.close();
 		}
 		catch (IOException e) {
@@ -81,7 +81,7 @@ public class Input {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * 	Metoda hledajici konce komentaru, aby mohli byt ignorovany
 	 * @param index index na kterem se se aktualne nachazi cteni souboru
@@ -89,7 +89,7 @@ public class Input {
 	 */
 	public int comment(int index) {
 		if(!(index >= (sLine.length-1))) {
-			index++;
+			index++; 
 		}
 		//problem uz neni
 		//problem je ze nedokaze pozna dvojty konec --- ⛏⛏ bere jako že obsahuje kncici

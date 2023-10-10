@@ -4,10 +4,20 @@ public class Path {
 	/**
 	 * cislo skladu odkoud/kam vede cesta
 	 */
-	int warehouse;
+	private int warehouseID;
 	/**
 	 * cislo zakaznika odkoud/kam vede cesta
 	 */
-	int customer;
+	private int customerID;
+	
+	/**
+	 * @param warehouse
+	 * @param customer
+	 */
+	public Path(int warehouseID, int customerID) {
+		this.warehouseID = warehouseID;
+		this.customerID = customerID;
+	}
+	
 
 }
