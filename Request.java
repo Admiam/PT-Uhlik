@@ -4,18 +4,31 @@ public class Request {
 	/**
 	 * cas prichodu pozadavku
 	 */
-	double tz;
+	private double tz;
 	/**
 	 * ID zakaznika kteremu dorucujeme pozadavek
 	 */
-	int customerID;
+	private int customerID;
 	/**
 	 * pocet pozadovanych pytlu
 	 */
-	int n;
+	private int n;
 	/**
 	 * doba do ktere musi byt pozadavek vyrizen
 	 */
-	double tp;
+	private double tp;
+	
+	/**
+	 * @param tz
+	 * @param customerID
+	 * @param n
+	 * @param tp
+	 */
+	public Request(double tz, int customerID, int n, double tp) {
+		this.tz = tz;
+		this.customerID = customerID;
+		this.n = n;
+		this.tp = tp;
+	}
 	
 }

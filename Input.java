@@ -7,15 +7,39 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Input {
+	/**
+	 * aktualni ctena radka
+	 */
+	private String line;
+	/**
+	 * reader na vstup dat
+	 */
+	private BufferedReader inputData;
+	/**
+	 * writer na vystup dat
+	 */
+	private BufferedWriter outputData;
+	/**
+	 * aktualni radka rozdelena na jednotlive retezce
+	 */
+	private String[] sLine;
+	/**
+	 * znakova sekvence oznacujici zacatek retezce
+	 */
+	private CharSequence start = "❄";
+	/**
+	 * znakova sekvence oznacujici konec retezce
+	 */
+	private CharSequence end = "⛏";
+	/**
+	 * nazev vstupniho souboru
+	 */
+	private String input = "crazy_user_input.txt";
+	/**
+	 * nazev vystupniho souboru
+	 */
+	private String output = "output.txt";
 	
-	String line;
-	BufferedReader inputData;
-	BufferedWriter outputData;
-	String[] sLine;
-	CharSequence start = "❄";
-	CharSequence end = "⛏";
-	String input = "crazy_user_input.txt";
-	String output = "output.txt";
 	
 	public Input() {
 		
