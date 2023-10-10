@@ -6,26 +6,50 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Input{
-	
-	String line;
-	BufferedReader inputData;
-	BufferedWriter outputData;
-	String[] sLine;
-	CharSequence start = "❄";
-	CharSequence end = "⛏";
-	String input = "crazy_user_input.txt";
-	String output = "output.txt";
-	
-	public Input() {
-		
-	}
-	
+public class Input {
 	/**
-	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro 
+	 * aktualni ctena radka
+	 */
+	private String line;
+	/**
+	 * reader na vstup dat
+	 */
+	private BufferedReader inputData;
+	/**
+	 * writer na vystup dat
+	 */
+	private BufferedWriter outputData;
+	/**
+	 * aktualni radka rozdelena na jednotlive retezce
+	 */
+	private String[] sLine;
+	/**
+	 * znakova sekvence oznacujici zacatek retezce
+	 */
+	private CharSequence start = "❄";
+	/**
+	 * znakova sekvence oznacujici konec retezce
+	 */
+	private CharSequence end = "⛏";
+	/**
+	 * nazev vstupniho souboru
+	 */
+	private String input = "crazy_user_input.txt";
+	/**
+	 * nazev vystupniho souboru
+	 */
+	private String output = "output.txt";
+
+
+	public Input() {
+
+	}
+
+	/**
+	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro
 	 * ziskani dat
 	 */
-	public void read() {		
+	public void read() {
 		try {
 			inputData = Files.newBufferedReader(Paths.get(input));
 			//inputData = Files.newBufferedReader(Paths.get("strangeL.txt"));
@@ -47,9 +71,9 @@ public class Input{
 							outputData.newLine();
 						}
 					}
-				}	
+				}
 			}
-		//TODO objekty z dat
+			//TODO objekty z dat
 			outputData.close();
 		}
 		catch (IOException e) {
@@ -57,7 +81,7 @@ public class Input{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 	Metoda hledajici konce komentaru, aby mohli byt ignorovany
 	 * @param index index na kterem se se aktualne nachazi cteni souboru
@@ -65,7 +89,7 @@ public class Input{
 	 */
 	public int comment(int index) {
 		if(!(index >= (sLine.length-1))) {
-			index++; 
+			index++;
 		}
 		//problem uz neni
 		//problem je ze nedokaze pozna dvojty konec --- ⛏⛏ bere jako že obsahuje kncici
@@ -97,4 +121,3 @@ public class Input{
 		return index;
 	}
 }
-
