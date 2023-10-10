@@ -19,14 +19,18 @@ public class Input {
 		
 	}
 	
+	/**
+	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro 
+	 * ziskani dat
+	 */
 	public void read() {		
 		try {
 			inputData = Files.newBufferedReader(Paths.get("crazy_user_input.txt"));
 			//inputData = Files.newBufferedReader(Paths.get("strangeL.txt"));
 			output = new BufferedWriter(new FileWriter("output.txt"));
 			while((line = inputData.readLine()) != null) {
-				//vyresit komentare
-				//vyresit odstraneni vsech bilych znaku
+				//resi komentare
+				//resi odstraneni bilych znaku
 				line = line.replaceAll("\\s+", " ");
 				line = line.replaceAll("❄", " ❄ ");
 				line = line.replaceAll("⛏", " ⛏ ");
@@ -41,10 +45,9 @@ public class Input {
 							output.newLine();
 						}
 					}
-				}
-				//vyresit vytvoreni objektu z dat
-				
+				}	
 			}
+		//TODO objekty z dat
 			output.close();
 		}
 		catch (IOException e) {
@@ -53,12 +56,19 @@ public class Input {
 		}
 	}
 	
+	/**
+	 * 	Metoda hledajici konce komentaru, aby mohli byt ignorovany
+	 * @param index index na kterem se se aktualne nachazi cteni souboru
+	 * @return vraci index na kterem skoncil komentar
+	 */
 	public int comment(int index) {
 		if(!(index >= (sLine.length-1))) {
 			index++; 
 		}
+		//problem uz neni
 		//problem je ze nedokaze pozna dvojty konec --- ⛏⛏ bere jako že obsahuje kncici
 		//symbol ale v poli je to oboje na 1 indexu takze ukonoci pouze jednou
+		//
 		while(!sLine[index].contains(end)) {
 			if(sLine[index].contains(start)) {
 				index = comment(index)+1;
