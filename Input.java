@@ -10,10 +10,12 @@ public class Input {
 	
 	String line;
 	BufferedReader inputData;
-	BufferedWriter output;
+	BufferedWriter outputData;
 	String[] sLine;
 	CharSequence start = "❄";
 	CharSequence end = "⛏";
+	String input = "crazy_user_input.txt";
+	String output = "output.txt";
 	
 	public Input() {
 		
@@ -25,9 +27,9 @@ public class Input {
 	 */
 	public void read() {		
 		try {
-			inputData = Files.newBufferedReader(Paths.get("crazy_user_input.txt"));
+			inputData = Files.newBufferedReader(Paths.get(input));
 			//inputData = Files.newBufferedReader(Paths.get("strangeL.txt"));
-			output = new BufferedWriter(new FileWriter("output.txt"));
+			outputData = new BufferedWriter(new FileWriter(output));
 			while((line = inputData.readLine()) != null) {
 				//resi komentare
 				//resi odstraneni bilych znaku
@@ -41,14 +43,14 @@ public class Input {
 					}
 					if(i < sLine.length) {
 						if(!sLine[i].isEmpty()) {
-							output.write(sLine[i]);
-							output.newLine();
+							outputData.write(sLine[i]);
+							outputData.newLine();
 						}
 					}
 				}	
 			}
 		//TODO objekty z dat
-			output.close();
+			outputData.close();
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
