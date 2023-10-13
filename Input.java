@@ -120,4 +120,12 @@ public class Input {
 		}
 		return index;
 	}
+	
+	public void setInput(String input) {
+		this.input = input;
+	}
+	
+	public void setOutput(String output) {
+		this.output = output;
+	}
 }

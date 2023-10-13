@@ -13,9 +13,11 @@ public class GUI  extends JFrame implements ActionListener{
     private JLabel output;
     private JTextField tOutput;
     private JButton submitBtn;
+    private Input file;
 
-    public GUI() {
-
+    public GUI(Input in) {
+    	
+    	this.file = in;
         setTitle("Sto roků v šachtě žil");
         setBounds(300, 90, 600, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -69,10 +71,10 @@ public class GUI  extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitBtn){
 
-            String inputData = tInput.getText();
-            String outputData = tOutput.getText();
+            file.setInput(tInput.getText());
+            file.setOutput(tOutput.getText());
 
-            System.out.println("input: " + inputData + " , output: " + outputData);
+            System.out.println("input: " + tInput.getText() + " , output: " + tOutput.getText());
         }
     }
 }
