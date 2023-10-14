@@ -70,9 +70,14 @@ public class GUI  extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitBtn){
-
-            file.setInput(tInput.getText());
-            file.setOutput(tOutput.getText());
+        	
+        	if(tInput.getText() == null) {
+        		file.setInput(tInput.getText());
+        	}
+        	if(tOutput.getText() == null) {
+        		file.setOutput(tOutput.getText());
+        	}
+            file.read();
 
             System.out.println("input: " + tInput.getText() + " , output: " + tOutput.getText());
         }

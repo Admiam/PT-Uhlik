@@ -17,6 +17,7 @@ public class Customer extends Vertex {
 	public Customer(double x, double y) {
 		this.x = x;
 		this.y = y;
+
 	}
 		
 }

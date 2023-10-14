@@ -128,4 +128,8 @@ public class Input {
 	public void setOutput(String output) {
 		this.output = output;
 	}
+	
+	public String getOutput() {
+		return this.output;
+	}
 }
