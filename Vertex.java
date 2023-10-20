@@ -1,9 +1,9 @@
 
 public abstract class Vertex {
 	
-	private double x;
-	private double y;
-	protected static int ID;
+	//protected static int ID;
+	double x;
+	double y;
 	
 	public double getX() {
 		return x;

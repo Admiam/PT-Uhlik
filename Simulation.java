@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class Simulation {
 	
@@ -13,12 +14,24 @@ public class Simulation {
 	static Path[] paths;
 	static Wheelbarrow[] wheels;
 	static Request[] requests;
+	static double wMatrix[][];
+	static int predchudce[][];
 
 	public static void main(String[] args) throws Exception {
 		Input input = new Input();
 		input.read();
 		//GUI gui = new GUI(input);
 		createObjects(input.getOutput());
+		System.out.println("Velikosti: W - " + warehouses.length + " | " + "C - " + customers.length + " | " + "P - " + paths.length + " | " + "WHEE - " + wheels.length + " | " + "R - " + requests.length);
+	//	System.out.println(customers[1].getX() + " " +customers[1].getY());
+	//	for(int i = 0; i < paths.length ; i++) {
+	//		System.out.println(paths[i].getDistance()); 
+	//	}
+		predchudce = new int[vertexes.length][vertexes.length];
+		for(int i = 0; i < vertexes.length; i++) {
+			Arrays.fill(predchudce[i], -1);
+		}
+		
 	}
 	
 	public static void createObjects(String processedFile) {
@@ -28,6 +41,10 @@ public class Simulation {
 			createWarehouse(Integer.parseInt(file.readLine()));
 			createCustomer(Integer.parseInt(file.readLine()));
 			vertexes = new Vertex[warehouses.length + customers.length];
+			wMatrix = new double[vertexes.length][vertexes.length];
+			for(int i = 0; i < vertexes.length; i++) {
+				Arrays.fill(wMatrix[i], 0.0);
+			}
 			fillVertexes();
 			createPath(Integer.parseInt(file.readLine()));
 			createWheelbarrow(Integer.parseInt(file.readLine()));
@@ -92,10 +109,14 @@ public class Simulation {
 		paths = new Path[count];
 		for(int i = 0; i < count; i++) {
 			try {
+				int x = Integer.parseInt( file.readLine());
+				int y = Integer.parseInt( file.readLine());
 			paths[i] = new Path(
-					Integer.parseInt( file.readLine()),
-					Integer.parseInt( file.readLine())
-					);
+								x,
+								y
+							);
+			paths[i].calculateDistance(vertexes[x-1].getX(), vertexes[x-1].getY(), vertexes[y-1].getX(), vertexes[y-1].getY());
+			wMatrix[x-1][y-1] = paths[i].getDistance();
 			System.out.println("P");
 			}
 			catch (IOException e) {
@@ -147,4 +168,17 @@ public class Simulation {
 		}
 	}
 
+	public static void FWalgorithm() {
+		for (int k = 0; k < vertexes.length; k++) {
+            for (int i = 0; i < vertexes.length; i++) {
+                for (int j = 0; j < vertexes.length; j++) {
+                    if (wMatrix[i][k] != 0 && wMatrix[k][j] != 0 && wMatrix[i][k] + wMatrix[k][j] < wMatrix[i][j]) {
+                    	wMatrix[i][j] = wMatrix[i][k] + wMatrix[k][j];
+                        predchudce[i][j] = k;
+                    }
+                }
+            }
+        }
+	}
+	
 }

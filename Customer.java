@@ -20,4 +20,11 @@ public class Customer extends Vertex {
 
 	}
 		
+	public double getX() {
+		return x;
+	}
+		
+	public double getY() {
+		return y;
+	}
 }
