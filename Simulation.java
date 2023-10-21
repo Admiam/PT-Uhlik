@@ -12,38 +12,43 @@ public class Simulation {
 	static Warehouse[] warehouses;
 	static Customer[] customers;
 	static Path[] paths;
-	static Wheelbarrow[] wheels;
+	static Wheelbarrow[] wheelTypes;
 	static Request[] requests;
 	static double wMatrix[][];
 	static int predchudce[][];
 
 	public static void main(String[] args) throws Exception {
+		
 		Input input = new Input();
 		input.read();
 		//GUI gui = new GUI(input);
 		createObjects(input.getOutput());
-		System.out.println("Velikosti: W - " + warehouses.length + " | " + "C - " + customers.length + " | " + "P - " + paths.length + " | " + "WHEE - " + wheels.length + " | " + "R - " + requests.length);
+		
+		System.out.println("Velikosti: W - " + warehouses.length + " | " + "C - " + customers.length + " | " + "P - " + paths.length + " | " + "WHEE - " + wheelTypes.length + " | " + "R - " + requests.length);
 	//	System.out.println(customers[1].getX() + " " +customers[1].getY());
 	//	for(int i = 0; i < paths.length ; i++) {
 	//		System.out.println(paths[i].getDistance()); 
 	//	}
+		
 		predchudce = new int[vertexes.length][vertexes.length];
 		for(int i = 0; i < vertexes.length; i++) {
 			Arrays.fill(predchudce[i], -1);
 		}
+		FWalgorithm();
+		
+		//TODO: sort pole requestu a zarazeni do fronty
 		
 	}
 	
 	public static void createObjects(String processedFile) {
 		try {
 			file = Files.newBufferedReader(Paths.get(processedFile));
-			//line = file.readLine();
 			createWarehouse(Integer.parseInt(file.readLine()));
 			createCustomer(Integer.parseInt(file.readLine()));
 			vertexes = new Vertex[warehouses.length + customers.length];
 			wMatrix = new double[vertexes.length][vertexes.length];
 			for(int i = 0; i < vertexes.length; i++) {
-				Arrays.fill(wMatrix[i], 0.0);
+				Arrays.fill(wMatrix[i], 0);
 			}
 			fillVertexes();
 			createPath(Integer.parseInt(file.readLine()));
@@ -127,10 +132,10 @@ public class Simulation {
 	}
 	
 	public static void createWheelbarrow(int count) {
-		wheels = new Wheelbarrow[count];
+		wheelTypes = new Wheelbarrow[count];
 		for(int i = 0; i < count; i++) {
 			try {
-			wheels[i] = new Wheelbarrow(
+			wheelTypes[i] = new Wheelbarrow(
 					file.readLine(),
 					Double.parseDouble( file.readLine()),
 					Double.parseDouble( file.readLine()),

@@ -1,7 +1,6 @@
 
 public abstract class Vertex {
 	
-	//protected static int ID;
 	double x;
 	double y;
 	

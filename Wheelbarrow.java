@@ -1,3 +1,4 @@
+import java.util.Random;
 
 public class Wheelbarrow {
 	
@@ -34,6 +35,16 @@ public class Wheelbarrow {
 	 */
 	private double pd;
 	
+	private int velocity;
+	
+	private double distance;
+	
+	private static int count = 0;
+	
+	private int id;
+	
+	private Random rd = new Random();
+	
 	/**
 	 * @param name
 	 * @param vmin
@@ -53,7 +64,54 @@ public class Wheelbarrow {
 		this.td = td;
 		this.kd = kd;
 		this.pd = pd;
+		this.id = 0;
 	}
 	
+	public Wheelbarrow(Wheelbarrow type) {
+		this.name = type.name;
+		this.velocity = generateVelocity(type.vmax, type.vmin);
+		this.distance = generateDistance(type.dmax, type.dmin);
+		this.td = type.td;
+		this.kd = type.kd;
+		this.pd = -1;
+		count++;
+		this.id = count;
+			
+	}
+
+	private int generateVelocity(double vx, double vn){
+		int v = rd.nextInt(((int)vx) - ((int)vn) + 1) + ((int)vn);
+		return v;
+	}
+	
+	private double generateDistance(double dx, double dn) {
+		//TODO: Vypocet pomoci gausova klobouku
+		double d = dx-dn;
+		return d;
+	}
+
+	public double getRepairTime() {
+		return td;
+	}
+
+	public int getVolume() {
+		return kd;
+	}
+
+	public int getVelocity() {
+		return velocity;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+	
+	public double getProbability() {
+		return pd;
+	}
+	
+	public int getID() {
+		return id;
+	}
 	
 }

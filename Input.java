@@ -52,7 +52,6 @@ public class Input {
 	public void read() {		
 		try {
 			inputData = Files.newBufferedReader(Paths.get(input));
-			//inputData = Files.newBufferedReader(Paths.get("strangeL.txt"));
 			outputData = new BufferedWriter(new FileWriter(output));
 			while((line = inputData.readLine()) != null) {
 				//resi komentare
@@ -73,7 +72,6 @@ public class Input {
 					}
 				}	
 			}
-		//TODO objekty z dat
 			outputData.close();
 		}
 		catch (IOException e) {
@@ -91,10 +89,6 @@ public class Input {
 		if(!(index >= (sLine.length-1))) {
 			index++; 
 		}
-		//problem uz neni
-		//problem je ze nedokaze pozna dvojty konec --- ⛏⛏ bere jako že obsahuje kncici
-		//symbol ale v poli je to oboje na 1 indexu takze ukonoci pouze jednou
-		//
 		while(!sLine[index].contains(end)) {
 			if(sLine[index].contains(start)) {
 				index = comment(index)+1;
