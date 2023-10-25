@@ -23,7 +23,7 @@ public class Warehouse extends Vertex {
 	private double tn;
 	
 	/**
-	 * 
+	 * Konstruktor
 	 * @param x
 	 * @param y
 	 * @param ks
@@ -38,10 +38,16 @@ public class Warehouse extends Vertex {
 		this.tn = tn;
 	}
 	
+	/**
+	 * Getter pro ziskani souradnice X skladu
+	 */
 	public double getX() {
 		return x;
 	}
-		
+	
+	/**
+	 * Getter pro ziskani souradnice Y skladu
+	 */
 	public double getY() {
 		return y;
 	}

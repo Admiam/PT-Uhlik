@@ -19,6 +19,7 @@ public class Request {
 	private double tp;
 	
 	/**
+	 * Konstruktor
 	 * @param tz
 	 * @param customerID
 	 * @param n

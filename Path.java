@@ -15,6 +15,7 @@ public class Path {
 	private double distance;
 	
 	/**
+	 * Konstruktor
 	 * @param warehouse
 	 * @param customer
 	 */
@@ -39,6 +40,9 @@ public class Path {
 		
 	}
 	
+	/**
+	 * Getter pro ziskani delky cesty
+	 */
 	public double getDistance() {
 		return distance;
 	}
