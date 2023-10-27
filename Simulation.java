@@ -86,8 +86,8 @@ public class Simulation {
 				}
 				System.out.println();
 			}
-		*/
 		
+		*/
 		
 		//TODO: sort pole requestu a zarazeni do fronty
 		
@@ -197,6 +197,7 @@ public class Simulation {
 								);
 				paths[i].calculateDistance(vertexes[x-1].getX(), vertexes[x-1].getY(), vertexes[y-1].getX(), vertexes[y-1].getY());
 				wMatrix[x-1][y-1] = paths[i].getDistance();
+				wMatrix[y-1][x-1] = wMatrix[x-1][y-1];
 				System.out.println("P");
 			}
 			catch (IOException e) {
@@ -263,7 +264,7 @@ public class Simulation {
 		for (int k = 0; k < vertexes.length; k++) {
             for (int i = 0; i < vertexes.length; i++) {
                 for (int j = 0; j < vertexes.length; j++) {
-                    if (wMatrix[i][k] != INFINITY && wMatrix[k][j] != INFINITY && wMatrix[i][k] + wMatrix[k][j] < wMatrix[i][j]) {
+                    if ((wMatrix[i][k] != INFINITY) && (wMatrix[k][j] != INFINITY) && (wMatrix[i][k] + wMatrix[k][j] < wMatrix[i][j])) {
                     	wMatrix[i][j] = wMatrix[i][k] + wMatrix[k][j];
                         predchudce[i][j] = k;
                     }
