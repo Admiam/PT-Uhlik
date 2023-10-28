@@ -45,5 +45,7 @@ public class Warehouse extends Vertex {
 	public double getY() {
 		return y;
 	}
+	public double getTs(){ return ts; }
+	public double getTn(){ return tn; }
 	
 }

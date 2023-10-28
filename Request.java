@@ -30,5 +30,8 @@ public class Request {
 		this.n = n;
 		this.tp = tp;
 	}
+	public double getTz(){
+		return tz;
+	}
 	
 }

@@ -16,6 +16,7 @@ public class Simulation {
 	static Request[] requests;
 	static double wMatrix[][];
 	static int predchudce[][];
+//	static Timer timer;
 
 	public static void main(String[] args) throws Exception {
 		
@@ -84,8 +85,9 @@ public class Simulation {
 					Double.parseDouble( file.readLine()),
 					Double.parseDouble(file.readLine())
 					);
-			System.out.println("W");
+//			System.out.println("W - " + warehouses.getTs());
 			}
+
 			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

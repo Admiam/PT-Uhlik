@@ -46,7 +46,7 @@ public class Input {
 	}
 	
 	/**
-	 * Metoda resici nacteni vstupniho souboru a jeho predypracovani pro 
+	 * Metoda resici nacteni vstupniho souboru a jeho predzpracovani pro
 	 * ziskani dat
 	 */
 	public void read() {		

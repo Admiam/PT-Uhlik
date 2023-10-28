@@ -19,7 +19,7 @@ public class Wheelbarrow {
 	 */
 	private double dmin;
 	/**
-	 * maximalni vzzdalenost potrebna pro opravu
+	 * maximalni vzdalenost potrebna pro opravu
 	 */
 	private double dmax;
 	/**
