@@ -11,6 +11,7 @@ public class Customer extends Vertex {
 	private double y;
 	
 	/**
+	 * Konstruktor
 	 * @param x
 	 * @param y
 	 */
@@ -19,11 +20,17 @@ public class Customer extends Vertex {
 		this.y = y;
 
 	}
-		
+	
+	/**
+	 * Getter pro ziskani souradnice X zakaznika
+	 */
 	public double getX() {
 		return x;
 	}
-		
+	
+	/**
+	 * Getter pro ziskani souradnice Y zakaznika
+	 */
 	public double getY() {
 		return y;
 	}

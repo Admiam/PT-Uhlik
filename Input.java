@@ -115,14 +115,26 @@ public class Input {
 		return index;
 	}
 	
+	/**
+	 * Setter na nastaveni vstupniho souboru
+	 * @param input
+	 */
 	public void setInput(String input) {
 		this.input = input;
 	}
 	
+	/**
+	 * Setter na nastaveni vystupniho souboru
+	 * @param output
+	 */
 	public void setOutput(String output) {
 		this.output = output;
 	}
 	
+	/**
+	 * Getter na ziskani cesty k vystupnimu souboru
+	 * @return
+	 */
 	public String getOutput() {
 		return this.output;
 	}
