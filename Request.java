@@ -34,5 +34,14 @@ public class Request {
 	public double getTz(){
 		return tz;
 	}
+	public int getID(){
+		return customerID;
+	}
+	public int getN(){
+		return n;
+	}
+	public double getTp(){
+		return tp;
+	}
 	
 }

@@ -11,6 +11,10 @@ public class Simulation {
 	 */
 	static String line;
 	/**
+	 * index pozadavku
+	 */
+	static int indexP = 0;
+	/**
 	 * reader pro soubor
 	 */
 	static BufferedReader file;
@@ -34,6 +38,8 @@ public class Simulation {
 	 * pole druhu kolecek
 	 */
 	static Wheelbarrow[] wheelTypes;
+
+	static Wheelbarrow wheel;
 	/**
 	 * pole pozadavku
 	 */
@@ -88,8 +94,18 @@ public class Simulation {
 		 * }
 		 * 
 		 */
-
 		// TODO: sort pole requestu a zarazeni do fronty
+
+		//TODO vezmeš request[0]  vypis ze prisel.
+		if (requests[indexP] != null) {
+			arrivedRequest(requests[indexP]);
+		}
+		//TODO Generovani kolecka. Overit ze kolecko dorucit. pokud ne opakujeme pokud ano vysleme
+		if (wheelVerification(wheelTypes[indexP], requests[indexP], 0))
+			System.out.println("Verification is true");
+
+		//vezmeme si cestu od A do B rekontruujeme ji pomoci matice predchudcu. Pokud bude vrchol zakaznik vypis kuk.
+		//az dojede k zakaznikovi tak vypis
 
 	}
 
@@ -229,7 +245,7 @@ public class Simulation {
 						Double.parseDouble(file.readLine()),
 						Integer.parseInt(file.readLine()),
 						Double.parseDouble(file.readLine()));
-				System.out.println("K");
+				System.out.println("K"+i+" - " + wheelTypes[i].getID());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -277,4 +293,54 @@ public class Simulation {
 		}
 	}
 
+	/**
+	 * Metoda vypisujici prichozi request
+	 */
+	public static void arrivedRequest (Request request) {
+		int thisIndex = indexP + 1;
+		double deadline = request.getTp() + request.getTz();
+		System.out.println("Cas: "+ request.getTz() +", Pozadavek: "+ thisIndex +", Zakaznik: "+ request.getID() +", Pocet pytlu: "+ request.getN() +", Deadline: "+ deadline);
+	}
+
+	public static boolean wheelVerification(Wheelbarrow wheelType, Request newRequest, int warehouseID){
+		wheel = new Wheelbarrow(wheelTypes[0]);
+
+		int currentX = (int) customers[newRequest.getID() - 1].getX();
+		int currentY = (int) customers[newRequest.getID() - 1].getY();
+
+		double customerDistance = wMatrix[currentX + warehouses.length][0] * 2;
+
+		double deadline = newRequest.getTz() + newRequest.getTp();
+		double wheelTime = calculateTime(wheel.getDistance(), wheel.getVelocity());
+
+		System.out.println("Wheel barrow distance: "+ wheel.getDistance() +" | customer distance: " + customerDistance);
+		System.out.println("wheel bags: " + wheel.getVolume() + " | required bags: " + newRequest.getN());
+		System.out.println("wheel time: " + wheelTime + " | deadline: " + deadline);
+
+		while (wheel.getDistance() <= customerDistance && wheel.getVolume() <= newRequest.getN() && wheelTime <= deadline ) {
+			wheel = new Wheelbarrow(wheelTypes[0]);
+
+			if (wheel.getDistance() < customerDistance / 2) {
+				System.out.println("Kolecko nedojede k zakaznikovi :(");
+			}
+			if (wheel.getDistance() >= customerDistance / 2 && wheel.getDistance() < customerDistance) {
+				System.out.println("Kolecko nedojede zpet");
+			}
+			if (wheel.getDistance() >= customerDistance && wheel.getVolume() < newRequest.getN()) {
+				System.out.println("Kolecko dojede ale nedokaze nalozit pozadovany pocet pytlu");
+				return false;
+			}
+			if (wheel.getDistance() >= customerDistance && wheel.getVolume() >= newRequest.getN() && wheelTime > deadline) {
+				System.out.println("Kolecko dojede ale ne vcas");
+				return false;
+			}
+		//TODO procentualni zastoupeni pri generovani typu kolecka
+		}
+		return true;
+		}
+
+	public static double calculateTime(double distance, double velocity){
+		double time = (distance / velocity) + warehouses[0].getTn() * 2;
+		return time;
+	}
 }

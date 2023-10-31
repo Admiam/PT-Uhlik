@@ -82,9 +82,9 @@ public class Wheelbarrow {
 		this.velocity = 0;
 		this.distance = 0;
 	}
-	
+
 	/**
-	 * Konstrktor pro vygenerovani kolecka na zaklade jeho druhu
+	 * Konstruktor pro vygenerovani kolecka na zaklade jeho druhu
 	 * @param type
 	 */
 	public Wheelbarrow(Wheelbarrow type) {
@@ -116,14 +116,20 @@ public class Wheelbarrow {
 	
 	/**
 	 * Metoda generujici vzdalenost do udrzby kolecka
-	 * @param dx
-	 * @param dn
+	 * @param dmax
+	 * @param dmin
 	 * @return
 	 */
-	private double generateDistance(double dx, double dn) {
+	private double generateDistance(double dmax, double dmin) {
 		//TODO: Vypocet pomoci gausova klobouku
-		double d = dx-dn;
-		return d;
+		System.out.println("max: " + dmax + " | dmin: " + dmin);
+		if (dmax <= dmin){
+			System.out.println("Dmax is <= dmin");
+			return dmax;
+		}else {
+			double d = rd.nextDouble(dmax - dmin + 1) + dmin;
+			return d;
+		}
 	}
 
 	/**

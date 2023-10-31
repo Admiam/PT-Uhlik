@@ -16,8 +16,8 @@ public class Path {
 	
 	/**
 	 * Konstruktor
-	 * @param warehouse
-	 * @param customer
+	 * @param warehouseID
+	 * @param customerID
 	 */
 	public Path(int warehouseID, int customerID) {
 		this.warehouseID = warehouseID;
