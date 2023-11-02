@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Random;
 
 public class Simulation {
 
@@ -101,10 +102,10 @@ public class Simulation {
 			arrivedRequest(requests[indexP]);
 		}
 		//TODO Generovani kolecka. Overit ze kolecko dorucit. pokud ne opakujeme pokud ano vysleme
-		if (wheelVerification(wheelTypes[indexP], requests[indexP], 0))
+		if (wheelVerification(wheelTypes, requests[indexP], 0))
 			System.out.println("Verification is true");
 
-		//vezmeme si cestu od A do B rekontruujeme ji pomoci matice predchudcu. Pokud bude vrchol zakaznik vypis kuk.
+		//TODO vezmeme si cestu od A do B rekontruujeme ji pomoci matice predchudcu. Pokud bude vrchol zakaznik vypis kuk.
 		//az dojede k zakaznikovi tak vypis
 
 	}
@@ -302,8 +303,33 @@ public class Simulation {
 		System.out.println("Cas: "+ request.getTz() +", Pozadavek: "+ thisIndex +", Zakaznik: "+ request.getID() +", Pocet pytlu: "+ request.getN() +", Deadline: "+ deadline);
 	}
 
-	public static boolean wheelVerification(Wheelbarrow wheelType, Request newRequest, int warehouseID){
-		wheel = new Wheelbarrow(wheelTypes[0]);
+	public static Wheelbarrow getWheelType (Wheelbarrow[] types){
+		Random random = new Random();
+		double randomWheel = random.nextDouble();
+		System.out.println("Random number is: " + randomWheel);
+		double typesSum = 0;
+		for (Wheelbarrow type : types){
+			typesSum += type.getProbability();
+			System.out.println("Checking " + type.getID() + ". : " + type.getName() + " with: " + type.getProbability() + " propability");
+			if (typesSum >= randomWheel){
+				System.out.println("Choosing " + type.getID() + ". : " + type.getName() + " with: " + type.getProbability() + " propability");
+				return type;
+			}
+		}
+		return null;
+	}
+
+	public static boolean wheelVerification(Wheelbarrow[] wheelType, Request newRequest, int warehouseID){
+
+
+		Wheelbarrow thisWheelType = getWheelType(wheelType);
+
+		if (thisWheelType == null){
+			System.out.println("No wheel types");
+			return false;
+		}
+		wheel = new Wheelbarrow(thisWheelType);
+
 
 		int currentX = (int) customers[newRequest.getID() - 1].getX();
 		int currentY = (int) customers[newRequest.getID() - 1].getY();
@@ -334,7 +360,6 @@ public class Simulation {
 				System.out.println("Kolecko dojede ale ne vcas");
 				return false;
 			}
-		//TODO procentualni zastoupeni pri generovani typu kolecka
 		}
 		return true;
 		}

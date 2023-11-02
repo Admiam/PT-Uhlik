@@ -5,7 +5,7 @@ public class Wheelbarrow {
 	/**
 	 * nazev kolecka
 	 */
-	private String name;
+	public String name;
 	/**
 	 * minimalni rychlost kolecka
 	 */
@@ -81,6 +81,14 @@ public class Wheelbarrow {
 		this.id = 0;
 		this.velocity = 0;
 		this.distance = 0;
+	}
+	/**
+	 * Metoda vypisujici jmeno kolecka
+	 *
+	 * @return
+	 */
+	public String getName(){
+		return name;
 	}
 
 	/**
