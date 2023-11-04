@@ -2,9 +2,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
+//import java.util.Arrays;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.Random;
 
+/**
+ * Trida pravadejici simulaci
+ * @author TR
+ *
+ */
 public class Simulation {
 
 	/**
@@ -22,7 +30,7 @@ public class Simulation {
 	/**
 	 * pole vrcholu grafu
 	 */
-	static Vertex[] vertexes;
+	static Vertex[] vertices;
 	/**
 	 * pole skladu
 	 */
@@ -34,29 +42,47 @@ public class Simulation {
 	/**
 	 * pole cest
 	 */
-	static Path[] paths;
+//	static Path[] paths;
 	/**
 	 * pole druhu kolecek
 	 */
 	static Wheelbarrow[] wheelTypes;
-
+	/**
+	 * aktualni kolecko
+	 */
 	static Wheelbarrow wheel;
 	/**
 	 * pole pozadavku
 	 */
 	static Request[] requests;
 	/**
-	 * vazena matice vzdalenosti reprezentujici graf
+	 * objekt reprezentujici graf ulohy
 	 */
-	static double wMatrix[][];
+	private static Graph graph;
 	/**
-	 * pole predchudcu vrcholu v nejkratsi ceste
+	 * pole vzdalenosti s aktualne kontrolovaneho bodu
 	 */
-	static int predchudce[][];
+	private static double[] distances;
 	/**
-	 * hodnota reprezentujici nekonecno ve vazene matici grafu
+	 * pole arraylistu obsahujici cestu z aktualniho bodu do vsech ostatnich
 	 */
-	private static final int INFINITY = Integer.MAX_VALUE;
+	private static ArrayList<Integer>[] pathsFrom;
+	/**
+	 * ID skladu odkud se prevazi aktualne kolecko
+	 */
+	private static int spWarehouseID;
+	/**
+	 * aktualni cas simulace
+	 */
+	private static double time;
+	/**
+	 * celkovy pocet dorucenych pytlu
+	 */
+	private static int totalBags = 0;
+	/**
+	 * celkovy pocet splnenych pozadavku
+	 */
+	private static int totalSRequests = 0;
 
 	/**
 	 * Hlavni metoda spoustejici program
@@ -68,45 +94,25 @@ public class Simulation {
 
 		Input input = new Input();
 		input.read();
-		// GUI gui = new GUI(input);
 
-		/**
+		/*
 		 * Vytvoreni objektu z vstupnich dat
 		 */
 		createObjects(input.getOutput());
 
-		System.out.println("Velikosti: W - " + warehouses.length + " | " + "C - " + customers.length + " | " + "P - "
-				+ paths.length + " | " + "WHEE - " + wheelTypes.length + " | " + "R - " + requests.length);
-
-		predchudce = new int[vertexes.length][vertexes.length];
-		for (int i = 0; i < vertexes.length; i++) {
-			Arrays.fill(predchudce[i], -1);
+		if (requests != null && requests[indexP] != null) {
+				arrivedRequest(requests[indexP]);
+				
+				if (wheelVerification(requests[indexP])) {
+	
+					travelling(requests[indexP]);
+					
+					stats();
+				}	
 		}
-
-		FWalgorithm();
-
-		// Vypis matice pod FWalg
-		/*
-		 * for(int i = 0; i < vertexes.length; i++) {
-		 * for(int j = 0; j < vertexes.length; j++) {
-		 * System.out.print(wMatrix[i][j]+" ");
-		 * }
-		 * System.out.println();
-		 * }
-		 * 
-		 */
-		// TODO: sort pole requestu a zarazeni do fronty
-
-		//TODO vezmeš request[0]  vypis ze prisel.
-		if (requests[indexP] != null) {
-			arrivedRequest(requests[indexP]);
+		else {
+			System.out.println("Nejsou zadne pozadavky");
 		}
-		//TODO Generovani kolecka. Overit ze kolecko dorucit. pokud ne opakujeme pokud ano vysleme
-		if (wheelVerification(wheelTypes, requests[indexP], 0))
-			System.out.println("Verification is true");
-
-		//TODO vezmeme si cestu od A do B rekontruujeme ji pomoci matice predchudcu. Pokud bude vrchol zakaznik vypis kuk.
-		//az dojede k zakaznikovi tak vypis
 
 	}
 
@@ -114,24 +120,16 @@ public class Simulation {
 	 * Metoda vytvarejici objekty ze vstupnich dat a vytvarejici reprezentaci grafu
 	 * pomoci vazene matice sousednosti
 	 * 
-	 * @param processedFile
+	 * @param processedFile vstupni soubor s odstranenymi kometary
 	 */
 	public static void createObjects(String processedFile) {
 		try {
 			file = Files.newBufferedReader(Paths.get(processedFile));
 			createWarehouse(Integer.parseInt(file.readLine()));
 			createCustomer(Integer.parseInt(file.readLine()));
-			vertexes = new Vertex[warehouses.length + customers.length];
+			vertices = new Vertex[warehouses.length + customers.length];
+			graph = new Graph(vertices.length+1);
 			fillVertexes();
-			wMatrix = new double[vertexes.length][vertexes.length];
-			for (int i = 0; i < vertexes.length; i++) {
-				for (int j = 0; j < vertexes.length; j++) {
-					if (i == j)
-						wMatrix[i][j] = 0;
-					else
-						wMatrix[i][j] = INFINITY;
-				}
-			}
 			createPath(Integer.parseInt(file.readLine()));
 			createWheelbarrow(Integer.parseInt(file.readLine()));
 			createRequest(Integer.parseInt(file.readLine()));
@@ -148,11 +146,11 @@ public class Simulation {
 	public static void fillVertexes() {
 		int j = 0;
 		for (int i = 0; i < warehouses.length; i++) {
-			vertexes[i] = warehouses[i];
+			vertices[i] = warehouses[i];
 			j++;
 		}
 		for (int i = 0; i < customers.length; i++) {
-			vertexes[j] = customers[i];
+			vertices[j] = customers[i];
 			j++;
 		}
 	}
@@ -160,7 +158,7 @@ public class Simulation {
 	/**
 	 * Metoda vytvarejici sklady
 	 * 
-	 * @param count
+	 * @param count pocet skladu
 	 */
 	public static void createWarehouse(int count) {
 		warehouses = new Warehouse[count];
@@ -172,7 +170,6 @@ public class Simulation {
 						Integer.parseInt(file.readLine()),
 						Double.parseDouble(file.readLine()),
 						Double.parseDouble(file.readLine()));
-				// System.out.println("W - " + warehouses.getTs());
 			}
 
 			catch (IOException e) {
@@ -185,7 +182,7 @@ public class Simulation {
 	/**
 	 * Metoda vytvarejici zakazniky
 	 * 
-	 * @param count
+	 * @param count pocet zakazniku
 	 */
 	public static void createCustomer(int count) {
 		customers = new Customer[count];
@@ -194,7 +191,6 @@ public class Simulation {
 				customers[i] = new Customer(
 						Double.parseDouble(file.readLine()),
 						Double.parseDouble(file.readLine()));
-				System.out.println("C");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -205,22 +201,18 @@ public class Simulation {
 	/**
 	 * Metoda vytvarejici cesty a vypocitavajici ohodnoceni cesty
 	 * 
-	 * @param count
+	 * @param count pocet cest
 	 */
 	public static void createPath(int count) {
-		paths = new Path[count];
 		for (int i = 0; i < count; i++) {
 			try {
-				int x = Integer.parseInt(file.readLine());
-				int y = Integer.parseInt(file.readLine());
-				paths[i] = new Path(
-						x,
-						y);
-				paths[i].calculateDistance(vertexes[x - 1].getX(), vertexes[x - 1].getY(), vertexes[y - 1].getX(),
-						vertexes[y - 1].getY());
-				wMatrix[x - 1][y - 1] = paths[i].getDistance();
-				wMatrix[y - 1][x - 1] = wMatrix[x - 1][y - 1];
-				System.out.println("P");
+				int id1 = Integer.parseInt(file.readLine());
+				int id2 = Integer.parseInt(file.readLine());
+				double x = vertices[id1 - 1].getX() - vertices[id2 - 1].getX();
+				double y = vertices[id1 - 1].getY() - vertices[id2 - 1].getY();
+				double distance = Math.sqrt( (x*x) + (y*y) );
+				graph.addEdge(id1, id2, distance);
+				graph.addEdge(id2, id1, distance);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -231,7 +223,7 @@ public class Simulation {
 	/**
 	 * Metoda vytvarejici druhy kolecek
 	 * 
-	 * @param count
+	 * @param count pocet druhu kolecek
 	 */
 	public static void createWheelbarrow(int count) {
 		wheelTypes = new Wheelbarrow[count];
@@ -246,7 +238,6 @@ public class Simulation {
 						Double.parseDouble(file.readLine()),
 						Integer.parseInt(file.readLine()),
 						Double.parseDouble(file.readLine()));
-				System.out.println("K"+i+" - " + wheelTypes[i].getID());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -257,7 +248,7 @@ public class Simulation {
 	/**
 	 * Metoda vytvarejici pozadavky
 	 * 
-	 * @param count
+	 * @param count pocet pozadavku
 	 */
 	public static void createRequest(int count) {
 		requests = new Request[count];
@@ -268,104 +259,236 @@ public class Simulation {
 						Integer.parseInt(file.readLine()),
 						Integer.parseInt(file.readLine()),
 						Double.parseDouble(file.readLine()));
-				System.out.println("R");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		if(count == 0) requests = new Request[1];
 	}
 
-	/**
-	 * Metoda provadejici upravu matice pomoci Floyd-Warshallovy metody pro zjisteni
-	 * vzdalenosti v grafu
-	 */
-	public static void FWalgorithm() {
-		for (int k = 0; k < vertexes.length; k++) {
-			for (int i = 0; i < vertexes.length; i++) {
-				for (int j = 0; j < vertexes.length; j++) {
-					if ((wMatrix[i][k] != INFINITY) && (wMatrix[k][j] != INFINITY)
-							&& (wMatrix[i][k] + wMatrix[k][j] < wMatrix[i][j])) {
-						wMatrix[i][j] = wMatrix[i][k] + wMatrix[k][j];
-						predchudce[i][j] = k;
-					}
-				}
-			}
-		}
-	}
 
 	/**
-	 * Metoda vypisujici prichozi request
+	 * Metoda vypisujici prichozi pozadavek
+	 * @param request aktualni pozadavek
 	 */
 	public static void arrivedRequest (Request request) {
 		int thisIndex = indexP + 1;
 		double deadline = request.getTp() + request.getTz();
-		System.out.println("Cas: "+ request.getTz() +", Pozadavek: "+ thisIndex +", Zakaznik: "+ request.getID() +", Pocet pytlu: "+ request.getN() +", Deadline: "+ deadline);
+		time = request.getTz();
+		System.out.println("Cas: "+ (int)time +", Pozadavek: "+ thisIndex +", Zakaznik: "+ request.getID() +", Pocet pytlu: "+ request.getN() +", Deadline: "+ deadline);
 	}
 
+	/**
+	 * Metoda generuji kolecko podle pravdepodobnosti typu kolecek
+	 * @param types druhy kolecek
+	 * @return vraci vybrany typ kolecka
+	 */
 	public static Wheelbarrow getWheelType (Wheelbarrow[] types){
 		Random random = new Random();
 		double randomWheel = random.nextDouble();
-		System.out.println("Random number is: " + randomWheel);
 		double typesSum = 0;
 		for (Wheelbarrow type : types){
 			typesSum += type.getProbability();
-			System.out.println("Checking " + type.getID() + ". : " + type.getName() + " with: " + type.getProbability() + " propability");
 			if (typesSum >= randomWheel){
-				System.out.println("Choosing " + type.getID() + ". : " + type.getName() + " with: " + type.getProbability() + " propability");
 				return type;
 			}
 		}
 		return null;
 	}
 
-	public static boolean wheelVerification(Wheelbarrow[] wheelType, Request newRequest, int warehouseID){
+	/**
+	 * Metoda vytvarejici koleckoa overujici ze je schopne splnit aktualni pozadavek
+	 * @param newRequest aktualni pozadavek
+	 * @return vraci true pokud je kolecko vytvoreno, jinak false
+	 */
+	public static boolean wheelVerification(Request newRequest){
 
 
-		Wheelbarrow thisWheelType = getWheelType(wheelType);
+		Wheelbarrow thisWheelType = getWheelType(wheelTypes);
 
 		if (thisWheelType == null){
 			System.out.println("No wheel types");
 			return false;
 		}
 		wheel = new Wheelbarrow(thisWheelType);
+		
+		distances = dijkstra(graph, warehouses.length+newRequest.getID());
+		
+		double spToWarehouse = Double.MAX_VALUE;
+		spWarehouseID = -1;
+		for(int i = 0; i < distances.length; i++) {
+			if(i <= warehouses.length) {
+				if(distances[i] < spToWarehouse) {
+					spToWarehouse = distances[i];
+					spWarehouseID = i;
+				}
+			}
+		}
 
-
-		int currentX = (int) customers[newRequest.getID() - 1].getX();
-		int currentY = (int) customers[newRequest.getID() - 1].getY();
-
-		double customerDistance = wMatrix[currentX + warehouses.length][0] * 2;
+		double customerDistance = spToWarehouse * 2;
 
 		double deadline = newRequest.getTz() + newRequest.getTp();
-		double wheelTime = calculateTime(wheel.getDistance(), wheel.getVelocity());
+		double wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
 
-		System.out.println("Wheel barrow distance: "+ wheel.getDistance() +" | customer distance: " + customerDistance);
-		System.out.println("wheel bags: " + wheel.getVolume() + " | required bags: " + newRequest.getN());
-		System.out.println("wheel time: " + wheelTime + " | deadline: " + deadline);
-
-		while (wheel.getDistance() <= customerDistance && wheel.getVolume() <= newRequest.getN() && wheelTime <= deadline ) {
-			wheel = new Wheelbarrow(wheelTypes[0]);
-
-			if (wheel.getDistance() < customerDistance / 2) {
-				System.out.println("Kolecko nedojede k zakaznikovi :(");
-			}
-			if (wheel.getDistance() >= customerDistance / 2 && wheel.getDistance() < customerDistance) {
-				System.out.println("Kolecko nedojede zpet");
-			}
-			if (wheel.getDistance() >= customerDistance && wheel.getVolume() < newRequest.getN()) {
-				System.out.println("Kolecko dojede ale nedokaze nalozit pozadovany pocet pytlu");
-				return false;
-			}
-			if (wheel.getDistance() >= customerDistance && wheel.getVolume() >= newRequest.getN() && wheelTime > deadline) {
-				System.out.println("Kolecko dojede ale ne vcas");
-				return false;
+		int i = 0;
+		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline ) {
+			i++;
+			thisWheelType = getWheelType(wheelTypes);
+			wheel = new Wheelbarrow(thisWheelType);
+			if(i > 1000000) {
+				System.out.println("vice jak milion pokusu o vytvroeni kolecka, ktere zvladne dojet");
 			}
 		}
+		
+		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
+		
 		return true;
+		
 		}
 
-	public static double calculateTime(double distance, double velocity){
-		double time = (distance / velocity) + warehouses[0].getTn() * 2;
+	/**
+	 * Metoda pocitajici cas potrebny k doruceni
+	 * @param distance vzdalenost do cile
+	 * @param velocity rychlost kolecka
+	 * @param warehouseID ID skladu odkud kolecko jede
+	 * @return vraci vypocteny cas cesty
+	 */
+	public static double calculateTime(double distance, double velocity, int warehouseID){
+		double time = (distance / velocity) + warehouses[warehouseID].getTn();
 		return time;
+	}
+	
+	/**
+	 * Metoda provadejici vypisy cesty pro dany pozadavek
+	 * @param current aktualni pozadavek
+	 */
+	public static void travelling(Request current) {
+		
+		//odjezd
+		time += warehouses[spWarehouseID-1].getTn();
+		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", odjizdi ze Sklad: "+spWarehouseID);
+		
+		//cesta k zakaznikovi
+		double distance = 0;
+		for(int i = 1; i < pathsFrom[current.getID()].size(); i++) {
+			Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+			if(next instanceof Customer) {
+				distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+				time += distance / wheel.getVelocity();
+				System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+			}
+		}
+		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+current.getN()+", Vylozeno v: "+(int)time+", Casova rezerva: "+(int)(current.getTp()-time));
+		totalBags += current.getN();
+		totalSRequests++;
+		
+		//cesta zpet do skladu
+		distance = 0;
+		for(int i = pathsFrom[current.getID()].size()-1; i >= 1; i--) {
+			Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+			if(next instanceof Customer) {
+				distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+				time += distance / wheel.getVelocity();
+				System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+			}
+		}
+		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+		System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
+	}
+	
+	/**
+	 * dijkstruv algoritmus pro nalezeni cesty z jednoho bodu do vsech ostatnich
+	 * @param graph graf nad kterym je algoritmus provaden
+	 * @param startVertex pocatecni vrchol
+	 * @return vraci pole vzdalenosti od vstupniho vrcholu
+	 */
+	public static double[] dijkstra(Graph graph, int startVertex) {
+        int vertices = graph.neighbours.length;
+        PriorityQueue<Edge> priorityQueue = new PriorityQueue<>(vertices, Comparator.comparingDouble(edge -> edge.distance));
+        double[] distances = new double[vertices];
+        pathsFrom = new ArrayList[vertices];
+
+        for (int i = 0; i < vertices; i++) {
+            distances[i] = Double.MAX_VALUE;
+            pathsFrom[i] = new ArrayList<>();
+        }
+
+        distances[startVertex] = 0.0;
+        priorityQueue.add(new Edge(startVertex, 0.0));
+
+        while (!priorityQueue.isEmpty()) {
+            int start = priorityQueue.poll().dest;
+
+            for (int k = 0; k < graph.neighbours[start].size(); k++) {
+                Edge neighbour = graph.neighbours[start].get(k);
+                int next = neighbour.dest;
+                double weight = neighbour.distance;
+
+                double newDistance = distances[start] + weight;
+                if (newDistance < distances[next]) {
+                    distances[next] = newDistance;
+
+                    pathsFrom[next].clear();
+                    pathsFrom[next].addAll(pathsFrom[start]);
+                    pathsFrom[next].add(start);
+
+                    priorityQueue.add(new Edge(next, newDistance));
+                }
+            }
+        }
+
+        return distances;
+    
+    }
+	
+	/**
+	 * dijkstruv algoritmus pro nalezeni cesty z jednoho bodu do druheho
+	 * @param graph graf nad kterym je algoritmus provaden
+	 * @param startVertex pocatecni vrchol
+	 * @param endVertex koncovi vrchol
+	 * @return vraci vzdalenost vrcholu v grafu
+	 */
+	public static double dijkstra(Graph graph, int startVertex, int endVertex) {
+        int vertices = graph.neighbours.length;
+        PriorityQueue<Edge> priorityQueue = new PriorityQueue<>(vertices, Comparator.comparingDouble(edge -> edge.distance));
+        double[] distances = new double[vertices];
+
+        for (int i = 0; i < vertices; i++) {
+            distances[i] = Double.MAX_VALUE;
+        }
+
+        distances[startVertex] = 0.0;
+        priorityQueue.add(new Edge(startVertex, 0.0));
+
+        while (!priorityQueue.isEmpty()) {
+            int u = priorityQueue.poll().dest;
+
+            if (u == endVertex) {
+                return distances[u];
+            }
+
+            for (int k = 0; k < graph.neighbours[u].size(); k++) {
+                Edge neighbour = graph.neighbours[u].get(k);
+                int v = neighbour.dest;
+                double weight = neighbour.distance;
+
+                double newDistance = distances[u] + weight;
+                if (newDistance < distances[v]) {
+                    distances[v] = newDistance;
+                    priorityQueue.add(new Edge(v, newDistance));
+                }
+            }
+        }
+
+        return -1;
+    }
+	
+	/**
+	 * Metoda vypisujici statistiku na konci programu
+	 */
+	public static void stats() {
+		System.out.println("Celkem obslouzeno pozadavku: "+totalSRequests+" a doruceno celkem "+totalBags+" pytlu.");
 	}
 }

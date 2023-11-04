@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Trida spracovavajici vstupni soubor
+ * @author TR
+ *
+ */
 public class Input {
 	/**
 	 * aktualni ctena radka
@@ -34,7 +39,7 @@ public class Input {
 	/**
 	 * nazev vstupniho souboru
 	 */
-	private String input = "crazy_user_input.txt";
+	private String input = "tutorial.txt";
 	/**
 	 * nazev vystupniho souboru
 	 */
@@ -117,7 +122,7 @@ public class Input {
 	
 	/**
 	 * Setter na nastaveni vstupniho souboru
-	 * @param input
+	 * @param input nastaveni nazvu vstupniho souboru
 	 */
 	public void setInput(String input) {
 		this.input = input;
@@ -125,7 +130,7 @@ public class Input {
 	
 	/**
 	 * Setter na nastaveni vystupniho souboru
-	 * @param output
+	 * @param output  nastaveni nazvu vystupniho souboru
 	 */
 	public void setOutput(String output) {
 		this.output = output;
@@ -133,7 +138,7 @@ public class Input {
 	
 	/**
 	 * Getter na ziskani cesty k vystupnimu souboru
-	 * @return
+	 * @return vraci nazev vystupniho souboru
 	 */
 	public String getOutput() {
 		return this.output;

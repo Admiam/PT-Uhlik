@@ -1,4 +1,9 @@
 
+/**
+ * Trida reprezentujici sklad
+ * @author TR
+ *
+ */
 public class Warehouse extends Vertex {
 	
 	/**
@@ -24,11 +29,11 @@ public class Warehouse extends Vertex {
 	
 	/**
 	 * Konstruktor
-	 * @param x
-	 * @param y
-	 * @param ks
-	 * @param ts
-	 * @param tn
+	 * @param x kartezske souradnic skladu x
+	 * @param y kartezske souradnic skladu y 
+	 * @param ks pocet doplnenych pytlu
+	 * @param ts  doba doplneni zasob
+	 * @param tn doba nalozeni pytlu
 	 */
 	public Warehouse(double x, double y, int ks, double ts, double tn) {
 		this.x = x;
@@ -51,7 +56,15 @@ public class Warehouse extends Vertex {
 	public double getY() {
 		return y;
 	}
+	/**
+	 * Getter pro cas doplneni
+	 * @return vraci cas doplneni
+	 */
 	public double getTs(){ return ts; }
+	/**
+	 * Getter pro cas nalozeni
+	 * @return vraci cas nalozeni
+	 */
 	public double getTn(){ return tn; }
 	
 }

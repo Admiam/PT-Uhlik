@@ -1,5 +1,10 @@
 import java.util.Random;
 
+/**
+ * Trida reprezentujici kolecka a jejich typy
+ * @author TR
+ *
+ */
 public class Wheelbarrow {
 	
 	/**
@@ -37,7 +42,7 @@ public class Wheelbarrow {
 	/**
 	 * vysledna rychlost generovaneho kolecka
 	 */
-	private int velocity;
+	private double velocity;
 	/**
 	 * vyslednou urazenou drahu do udrzby generovaneho kolecka
 	 */
@@ -60,14 +65,14 @@ public class Wheelbarrow {
 	
 	/**
 	 * Konstrktor pro vytvoreni typu kolecka
-	 * @param name
-	 * @param vmin
-	 * @param vmax
-	 * @param dmin
-	 * @param dmax
-	 * @param td
-	 * @param kd
-	 * @param pd
+	 * @param name jmeno kolecka
+	 * @param vmin min rychlost
+	 * @param vmax max rychlost
+	 * @param dmin min vzdalenost do udrzby
+	 * @param dmax max vzdalenost do udrzby
+	 * @param td doba opravy
+	 * @param kd pocet pytlu
+	 * @param pd pravdepodobnost kolecka
 	 */
 	public Wheelbarrow(String name, double vmin, double vmax, double dmin, double dmax, double td, int kd, double pd) {
 		this.name = name;
@@ -85,7 +90,7 @@ public class Wheelbarrow {
 	/**
 	 * Metoda vypisujici jmeno kolecka
 	 *
-	 * @return
+	 * @return vraci jmeno kolecka
 	 */
 	public String getName(){
 		return name;
@@ -93,7 +98,7 @@ public class Wheelbarrow {
 
 	/**
 	 * Konstruktor pro vygenerovani kolecka na zaklade jeho druhu
-	 * @param type
+	 * @param type druh kolecka
 	 */
 	public Wheelbarrow(Wheelbarrow type) {
 		this.name = type.name;
@@ -113,31 +118,28 @@ public class Wheelbarrow {
 
 	/**
 	 * Metoda generujici rychlost kolecka
-	 * @param vx
-	 * @param vn
-	 * @return
+	 * @param vx max rychlost
+	 * @param vn min rychlost
+	 * @return vraci vyslednou rychlost
 	 */
-	private int generateVelocity(double vx, double vn){
-		int v = rd.nextInt(((int)vx) - ((int)vn) + 1) + ((int)vn);
+	private double generateVelocity(double vx, double vn){
+		double v = vn + (vx - vn) * rd.nextDouble();
 		return v;
 	}
 	
 	/**
 	 * Metoda generujici vzdalenost do udrzby kolecka
-	 * @param dmax
-	 * @param dmin
-	 * @return
+	 * @param dmax maximalni vzdalenost
+	 * @param dmin minimalni vzdalenost
+	 * @return vraci vzdalenost do udrzby 
 	 */
 	private double generateDistance(double dmax, double dmin) {
-		//TODO: Vypocet pomoci gausova klobouku
-		System.out.println("max: " + dmax + " | dmin: " + dmin);
-		if (dmax <= dmin){
-			System.out.println("Dmax is <= dmin");
-			return dmax;
-		}else {
-			double d = rd.nextDouble(dmax - dmin + 1) + dmin;
-			return d;
-		}
+
+		double mi = (dmin + dmax) / 2;  
+        double sigma = (dmax - dmin) / 4; 
+
+        double dfinal = rd.nextGaussian() * sigma + mi;
+		return dfinal;
 	}
 
 	/**
@@ -150,7 +152,7 @@ public class Wheelbarrow {
 
 	/**
 	 * Getter pro objem (pocet pytlu) kolecka
-	 * @return
+	 * @return vraci pocet pytlu kolecka
 	 */
 	public int getVolume() {
 		return kd;
@@ -158,15 +160,15 @@ public class Wheelbarrow {
 
 	/**
 	 * Getter pro rychlost kolecka
-	 * @return
+	 * @return vraci rychlost kolecka
 	 */
-	public int getVelocity() {
+	public double getVelocity() {
 		return velocity;
 	}
 
 	/**
 	 * Getter pro vzdalenost potrebnou do udrzby
-	 * @return
+	 * @return vraci vzdalenost do udrzby
 	 */
 	public double getDistance() {
 		return distance;
@@ -174,7 +176,7 @@ public class Wheelbarrow {
 	
 	/**
 	 * Getter pro ziskani pravdepodobnosti druhu kolecka
-	 * @return
+	 * @return vraci pravdepodobnost druhu kolecka
 	 */
 	public double getProbability() {
 		return pd;
@@ -182,7 +184,7 @@ public class Wheelbarrow {
 	
 	/**
 	 * Getter pro ziskani id kolecka
-	 * @return
+	 * @return vraci id kolecka
 	 */
 	public int getID() {
 		return id;

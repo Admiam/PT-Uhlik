@@ -1,4 +1,8 @@
-
+/**
+ * Trida reprezentujici zakaznika
+ * @author TR
+ *
+ */
 public class Customer extends Vertex {
 
 	/**
@@ -12,8 +16,8 @@ public class Customer extends Vertex {
 	
 	/**
 	 * Konstruktor
-	 * @param x
-	 * @param y
+	 * @param x kartezske souradnic zakaznika x
+	 * @param y kartezske souradnic zakaznika y
 	 */
 	public Customer(double x, double y) {
 		this.x = x;
