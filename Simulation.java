@@ -93,6 +93,7 @@ public class Simulation {
 	public static void main(String[] args) throws Exception {
 
 		Input input = new Input();
+		input.setInput("data/middleM.txt");
 		input.read();
 
 		/*
@@ -327,18 +328,31 @@ public class Simulation {
 		}
 
 		double customerDistance = spToWarehouse * 2;
-
 		double deadline = newRequest.getTz() + newRequest.getTp();
 		double wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
+		
+		int wrCount = 0;
+		
+		for(int i = 0; i <wheelTypes.length; i ++) {
+			if(wheelTypes[i].getDMax() < (customerDistance/2)) {
+				wrCount++;
+			}
+		}
+		if(wrCount == wheelTypes.length) {
+			System.out.println("Zadny druh kolecka nema dostatecnou maximalni vzdalenost pro dosazeni zakaznika");
+			System.out.println("Cas: "+(int)newRequest.getTp()+", Zakaznik "+newRequest.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+			return false;
+		}
+		
+		int falseC = 0;
 
-		int i = 0;
-		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline ) {
-			i++;
+		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline ) {		
+			
 			thisWheelType = getWheelType(wheelTypes);
 			wheel = new Wheelbarrow(thisWheelType);
-			if(i > 1000000) {
-				System.out.println("vice jak milion pokusu o vytvroeni kolecka, ktere zvladne dojet");
-			}
+			wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
+			
+		
 		}
 		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
@@ -415,8 +429,8 @@ public class Simulation {
             pathsFrom[i] = new ArrayList<>();
         }
 
-        distances[startVertex] = 0.0;
-        priorityQueue.add(new Edge(startVertex, 0.0));
+        distances[startVertex] = 0;
+        priorityQueue.add(new Edge(startVertex, 0));
 
         while (!priorityQueue.isEmpty()) {
             int start = priorityQueue.poll().dest;
@@ -459,8 +473,8 @@ public class Simulation {
             distances[i] = Double.MAX_VALUE;
         }
 
-        distances[startVertex] = 0.0;
-        priorityQueue.add(new Edge(startVertex, 0.0));
+        distances[startVertex] = 0;
+        priorityQueue.add(new Edge(startVertex, 0));
 
         while (!priorityQueue.isEmpty()) {
             int u = priorityQueue.poll().dest;

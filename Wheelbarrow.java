@@ -190,4 +190,12 @@ public class Wheelbarrow {
 		return id;
 	}
 	
+	/**
+	 * Getter na maximalni vzdalenost
+	 * @return vraci max vzdalenost
+	 */
+	public double getDMax(){
+		return dmax;
+	}
+	
 }
