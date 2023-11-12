@@ -74,7 +74,7 @@ public class Simulation {
 	/**
 	 * aktualni cas simulace
 	 */
-	private static double time;
+	private static double time = 0;
 	/**
 	 * celkovy pocet dorucenych pytlu
 	 */
@@ -83,6 +83,10 @@ public class Simulation {
 	 * celkovy pocet splnenych pozadavku
 	 */
 	private static int totalSRequests = 0;
+	/**
+	 * Fronta pozadavku
+	 */
+	private static PriorityQueue<Request> requestQ;
 
 	/**
 	 * Hlavni metoda spoustejici program
@@ -93,14 +97,39 @@ public class Simulation {
 	public static void main(String[] args) throws Exception {
 
 		Input input = new Input();
-		input.setInput("data/middleM.txt");
+		input.setInput("tutorial.txt");
 		input.read();
 
 		/*
 		 * Vytvoreni objektu z vstupnich dat
 		 */
+		
 		createObjects(input.getOutput());
 
+		//TODO zde udelat prioritni frontu pozadavku podle casu prichodu
+		//while neni prazdna bude se prochazet prijmani a plneni pozadavku
+		
+		if(requestQ.isEmpty()) {
+			System.out.println("Nejsou zadne pozadavky");
+		}
+		
+		while (!requestQ.isEmpty()) {
+			Request current = requestQ.poll();
+			arrivedRequest(current);
+			
+			if (wheelVerification(current)) {
+
+				travelling(current);
+				
+			}
+			else {
+				break;
+			}
+		}
+		stats();
+		
+		
+/*		
 		if (requests != null && requests[indexP] != null) {
 				arrivedRequest(requests[indexP]);
 				
@@ -114,7 +143,7 @@ public class Simulation {
 		else {
 			System.out.println("Nejsou zadne pozadavky");
 		}
-
+*/
 	}
 
 	/**
@@ -253,6 +282,7 @@ public class Simulation {
 	 */
 	public static void createRequest(int count) {
 		requests = new Request[count];
+		requestQ = new PriorityQueue<>(requests.length, Comparator.comparingDouble(request -> request.getTz()));
 		for (int i = 0; i < count; i++) {
 			try {
 				requests[i] = new Request(
@@ -260,6 +290,7 @@ public class Simulation {
 						Integer.parseInt(file.readLine()),
 						Integer.parseInt(file.readLine()),
 						Double.parseDouble(file.readLine()));
+				requestQ.add(requests[i]);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -276,7 +307,7 @@ public class Simulation {
 	public static void arrivedRequest (Request request) {
 		int thisIndex = indexP + 1;
 		double deadline = request.getTp() + request.getTz();
-		time = request.getTz();
+	//	time += request.getTz();
 		System.out.println("Cas: "+ (int)time +", Pozadavek: "+ thisIndex +", Zakaznik: "+ request.getID() +", Pocet pytlu: "+ request.getN() +", Deadline: "+ deadline);
 	}
 
@@ -321,10 +352,24 @@ public class Simulation {
 		for(int i = 0; i < distances.length; i++) {
 			if(i <= warehouses.length) {
 				if(distances[i] < spToWarehouse) {
-					spToWarehouse = distances[i];
-					spWarehouseID = i;
+					//TODO doplneni skladu podle casu pred testem zda ma dostatek
+					if((int)time != 0) {
+						warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
+					}
+					//warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
+					//chyba tohle prepise pocet pytlu na zacatku simulace
+					if(warehouses[i-1].getBc() >= newRequest.getN()) {
+						spToWarehouse = distances[i];
+						spWarehouseID = i;
+					}
+					//TODO jeste se musi zajistit ze se muze pockat urcity cas aby se ve skladu pytle naschromazdili
 				}
 			}
+		}
+		if(spWarehouseID == -1) {
+			System.out.println("Zadny sklad nema dostatek pytlu pro obslouzeni zakaznika");
+			System.out.println("Cas: "+(int)newRequest.getTp()+", Zakaznik "+newRequest.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+			return false;
 		}
 
 		double customerDistance = spToWarehouse * 2;
@@ -354,6 +399,7 @@ public class Simulation {
 			
 		
 		}
+		//TODO pridani kolecka do zasaobniku exitujicich kolecek
 		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
 		

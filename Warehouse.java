@@ -15,7 +15,7 @@ public class Warehouse extends Vertex {
 	 */
 	private double y;
 	/**
-	 * pocet pytlu ks, ktere jsou do skladu vzdy po uplynuti doby ts doplneny. Na zaćatku simulace
+	 * pocet pytlu ks, ktere jsou do skladu vzdy po uplynuti doby ts doplneny.
 	 */
 	private int ks;
 	/**
@@ -26,6 +26,15 @@ public class Warehouse extends Vertex {
 	 * doba nalozeni pytlu
 	 */
 	private double tn;
+	/**
+	 * aktualni pocet pytlu ve skladu
+	 */
+	private int bc;
+	/**
+	 * posledni cas doplneni
+	 */
+	private double lastTs;
+	
 	
 	/**
 	 * Konstruktor
@@ -41,10 +50,13 @@ public class Warehouse extends Vertex {
 		this.ks = ks;
 		this.ts = ts;
 		this.tn = tn;
+		this.lastTs = 0;
+		this.bc = ks;
 	}
 	
 	/**
 	 * Getter pro ziskani souradnice X skladu
+	 * @return vraci souradnici X skladu
 	 */
 	public double getX() {
 		return x;
@@ -52,6 +64,7 @@ public class Warehouse extends Vertex {
 	
 	/**
 	 * Getter pro ziskani souradnice Y skladu
+	 * @return vraci souradnici Y skladu
 	 */
 	public double getY() {
 		return y;
@@ -67,4 +80,44 @@ public class Warehouse extends Vertex {
 	 */
 	public double getTn(){ return tn; }
 	
+	/**
+	 * Getter pro ziskani poctu pytlu ve skladu
+	 * @return vraci pocet pytlu
+	 */
+	public int getBc() {
+		return bc;
+	}
+	
+	/**
+	 * Getter pro ziskani casu posledniho doplneni
+	 * @return vraci posledni cas doplneni
+	 */
+	public double getLastTs() {
+		return lastTs;
+	}
+
+	/**
+	 * Setter pro nastaveni poctu pytlu
+	 * @param bc novy pocet pytlu
+	 */
+	public void setBc(int bc) {
+		this.bc = bc;
+	}
+
+	/**
+	 * Setter pro nastaveni posledniho casu doplneni
+	 * @param lastTs novy posledni cas
+	 */
+	public void setLastTs(double lastTs) {
+		this.lastTs = lastTs;
+	}
+	
+	/**
+	 * Getter pro ziskani pocetu doplnovanych pytlu
+	 * @return vraci pocet doplnovanych pytlu
+	 */
+	public int getKs() {
+		return ks;
+	}
+
 }
