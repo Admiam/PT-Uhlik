@@ -391,6 +391,7 @@ public class Simulation {
 		
 		int falseC = 0;
 
+		//TODO vyslani vice kolecek pokud to nezvladne nalozit 1
 		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline ) {		
 			
 			thisWheelType = getWheelType(wheelTypes);
@@ -400,6 +401,12 @@ public class Simulation {
 		
 		}
 		//TODO pridani kolecka do zasaobniku exitujicich kolecek
+		
+		
+		//TODO vypocitat kolik pytlu se odvazi
+		warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
+		
+		
 		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
 		
