@@ -349,28 +349,44 @@ public class Simulation {
 		
 		double spToWarehouse = Double.MAX_VALUE;
 		spWarehouseID = -1;
+		
+		double nearestSP = Double.MAX_VALUE;
+		int nearestWareID = -1;
+		
+		int badWarehouse = 0;
+		
 		for(int i = 0; i < distances.length; i++) {
 			if(i <= warehouses.length) {
 				if(distances[i] < spToWarehouse) {
-					//TODO doplneni skladu podle casu pred testem zda ma dostatek
 					if((int)time != 0) {
-						warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
+						warehouses[i-1].setBc(((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs()+warehouses[i-1].getBc()));
 					}
 					//warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
-					//chyba tohle prepise pocet pytlu na zacatku simulace
 					if(warehouses[i-1].getBc() >= newRequest.getN()) {
 						spToWarehouse = distances[i];
 						spWarehouseID = i;
 					}
-					//TODO jeste se musi zajistit ze se muze pockat urcity cas aby se ve skladu pytle naschromazdili
+					nearestWareID = i;
+					nearestSP = distances[i];
+					
+					if(warehouses[i-1].getKs() <= 0) {
+						 badWarehouse++;
+					}
 				}
 			}
 		}
-		if(spWarehouseID == -1) {
+		if(spWarehouseID == -1 && badWarehouse == warehouses.length) {
 			System.out.println("Zadny sklad nema dostatek pytlu pro obslouzeni zakaznika");
 			System.out.println("Cas: "+(int)newRequest.getTp()+", Zakaznik "+newRequest.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
 			return false;
 		}
+		if(spWarehouseID == -1) {
+			time = time + warehouses[nearestWareID-1].getTs();
+			warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
+			spWarehouseID = nearestWareID;
+			spToWarehouse = nearestSP;
+		}
+		
 
 		double customerDistance = spToWarehouse * 2;
 		double deadline = newRequest.getTz() + newRequest.getTp();
@@ -405,7 +421,7 @@ public class Simulation {
 		
 		//TODO vypocitat kolik pytlu se odvazi
 		warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
-		
+		System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
 		
 		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
