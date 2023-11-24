@@ -97,7 +97,7 @@ public class Simulation {
 	public static void main(String[] args) throws Exception {
 
 		Input input = new Input();
-		input.setInput("tutorial.txt");
+		input.setInput("data/middleS.txt");
 		input.read();
 
 		/*
@@ -112,22 +112,14 @@ public class Simulation {
 		if(requestQ.isEmpty()) {
 			System.out.println("Nejsou zadne pozadavky");
 		}
-		
-		while (!requestQ.isEmpty()) {
-			Request current = requestQ.poll();
-			arrivedRequest(current);
-			
-			if (wheelVerification(current)) {
 
-				travelling(current);
-				
-			}
-			else {
-				break;
-			}
-		}
+		long start = System.currentTimeMillis();
+
+		startRequest();
+
 		stats();
-		
+		long stop = System.currentTimeMillis();
+		isCervenkaHappy(start, stop);
 		
 /*		
 		if (requests != null && requests[indexP] != null) {
@@ -144,6 +136,25 @@ public class Simulation {
 			System.out.println("Nejsou zadne pozadavky");
 		}
 */
+	}
+
+	/**
+	 * Rekurzivní metoda startujici simulaci a plneni pozadavku v prioritni fronte. Pokud pozadavek
+	 * cestuje odstartuje se další
+	 * */
+	public static void startRequest(){
+		while (!requestQ.isEmpty()) {
+			Request current = requestQ.poll();
+			arrivedRequest(current);
+
+			if (wheelVerification(current)) {
+				travelling(current);
+				startRequest();
+			}
+			else {
+				break;
+			}
+		}
 	}
 
 	/**
@@ -413,7 +424,6 @@ public class Simulation {
 			thisWheelType = getWheelType(wheelTypes);
 			wheel = new Wheelbarrow(thisWheelType);
 			wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
-			
 		
 		}
 		//TODO pridani kolecka do zasaobniku exitujicich kolecek
@@ -573,5 +583,23 @@ public class Simulation {
 	 */
 	public static void stats() {
 		System.out.println("Celkem obslouzeno pozadavku: "+totalSRequests+" a doruceno celkem "+totalBags+" pytlu.");
+	}
+
+	public static void isCervenkaHappy(long start, long stop){
+		long time = (stop - start) / 60000;
+		if (time > 20)
+			System.out.println("Cervenka je smutny, protoze program bezi "+time+" minut\n" + "_$$$$$__ __$$$___ $$$$$___ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
+																								"$$___$$_ _$$_$$__ $$__$$__ ___$$____ $$______ $$___$$_ $$___$$_ $$______ $$$__$$_ $$__$$__ _$$_$$__\n" +
+																								"_$$$____ $$___$$_ $$___$$_ __$$_____ $$$$$___ $$___$$_ _$$_$$__ $$$$$___ $$$$_$$_ $$$$$___ $$___$$_\n" +
+																								"___$$$__ $$$$$$$_ $$___$$_ __$$_____ $$______ $$$$$$__ _$$_$$__ $$______ $$_$$$$_ $$__$$__ $$$$$$$_\n" +
+																								"$$___$$_ $$___$$_ $$__$$__ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
+																								"_$$$$$__ $$___$$_ $$$$$___ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");
+		else
+			System.out.println("Cervenka je stastny, protoze program bezi jen "+time+" minut a neco drobneho\n" + "$$___$$_ __$$$___ $$$$$$__ $$$$$$__ $$____$$_ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
+																									"$$___$$_ _$$_$$__ $$___$$_ $$___$$_ _$$__$$__ ___$$____ $$______ $$___$$_ $$___$$_ $$______ $$$__$$_ $$__$$__ _$$_$$__\n" +
+																									"$$$$$$$_ $$___$$_ $$___$$_ $$___$$_ __$$$$___ __$$_____ $$$$$___ $$___$$_ _$$_$$__ $$$$$___ $$$$_$$_ $$$$$___ $$___$$_\n" +
+																									"$$___$$_ $$$$$$$_ $$$$$$__ $$$$$$__ ___$$____ __$$_____ $$______ $$$$$$__ _$$_$$__ $$______ $$_$$$$_ $$__$$__ $$$$$$$_\n" +
+																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
+																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");
 	}
 }
