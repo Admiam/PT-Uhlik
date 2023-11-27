@@ -189,6 +189,13 @@ public class Wheelbarrow {
 	public int getID() {
 		return id;
 	}
+
+	/**
+	 * Vypis id pro kontrolu
+	 */
+	public void printID() {
+		System.out.println("ID: " + id);
+	}
 	
 	/**
 	 * Getter na maximalni vzdalenost

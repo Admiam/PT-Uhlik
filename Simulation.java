@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Stack;
 
 /**
  * Trida pravadejici simulaci
@@ -87,7 +88,10 @@ public class Simulation {
 	 * Fronta pozadavku
 	 */
 	private static PriorityQueue<Request> requestQ;
-
+	/**
+	 * Zasobnik kolecek
+	 */
+	static WheelbarrowStack wheelbarrowStack = new WheelbarrowStack();
 	/**
 	 * Hlavni metoda spoustejici program
 	 * 
@@ -149,10 +153,12 @@ public class Simulation {
 
 			if (wheelVerification(current)) {
 				travelling(current);
-				startRequest();
-			}
-			else {
-				break;
+				if (!requestQ.isEmpty()) {
+					current = requestQ.poll();
+					arrivedRequest(current);
+				} else {
+					break; // Nejsou requesty
+				}
 			}
 		}
 	}
@@ -347,7 +353,6 @@ public class Simulation {
 	 */
 	public static boolean wheelVerification(Request newRequest){
 
-
 		Wheelbarrow thisWheelType = getWheelType(wheelTypes);
 
 		if (thisWheelType == null){
@@ -417,17 +422,38 @@ public class Simulation {
 		}
 		
 		int falseC = 0;
+		boolean findWheel = false;
 
 		//TODO vyslani vice kolecek pokud to nezvladne nalozit 1
-		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline ) {		
-			
-			thisWheelType = getWheelType(wheelTypes);
-			wheel = new Wheelbarrow(thisWheelType);
-			wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
-		
+
+
+		if(!wheelbarrowStack.isEmpty()) {
+
+			Stack<Wheelbarrow> copyWheelbarrowStack = wheelbarrowStack.clone();
+
+			for (Wheelbarrow wheelbarrow : copyWheelbarrowStack) {
+				if (wheelbarrow.getDistance() < customerDistance || wheelbarrow.getVolume() < newRequest.getN() || wheelTime >= deadline) {
+					findWheel = true;
+					wheel = wheelbarrow;
+					wheelbarrowStack.remove(wheelbarrow);
+					break;
+				}
+			}
+		} else if (!findWheel) {
+			while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline) {
+
+				thisWheelType = getWheelType(wheelTypes);
+				wheel = new Wheelbarrow(thisWheelType);
+				wheelbarrowStack.push(wheel);
+
+				wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID - 1);
+
+			}
+			if (!wheelbarrowStack.isEmpty())
+				wheelbarrowStack.pop().printID();
 		}
 		//TODO pridani kolecka do zasaobniku exitujicich kolecek
-		
+
 		
 		//TODO vypocitat kolik pytlu se odvazi
 		warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
@@ -585,6 +611,9 @@ public class Simulation {
 		System.out.println("Celkem obslouzeno pozadavku: "+totalSRequests+" a doruceno celkem "+totalBags+" pytlu.");
 	}
 
+	/**
+	 * Metoda vypisujici informaci o spokojenosti Cervenky
+	 */
 	public static void isCervenkaHappy(long start, long stop){
 		long time = (stop - start) / 60000;
 		if (time > 20)
