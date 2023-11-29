@@ -101,7 +101,7 @@ public class Simulation {
 	public static void main(String[] args) throws Exception {
 
 		Input input = new Input();
-		input.setInput("data/middleS.txt");
+		input.setInput("tutorial.txt");
 		input.read();
 
 		/*
@@ -154,8 +154,8 @@ public class Simulation {
 			if (wheelVerification(current)) {
 				travelling(current);
 				if (!requestQ.isEmpty()) {
-					current = requestQ.poll();
-					arrivedRequest(current);
+					//current = requestQ.poll();
+					//arrivedRequest(current);
 				} else {
 					break; // Nejsou requesty
 				}
@@ -376,6 +376,7 @@ public class Simulation {
 				if(distances[i] < spToWarehouse) {
 					if((int)time != 0) {
 						warehouses[i-1].setBc(((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs()+warehouses[i-1].getBc()));
+						warehouses[i-1].setLastTs(time);
 					}
 					//warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
 					if(warehouses[i-1].getBc() >= newRequest.getN()) {
@@ -399,6 +400,7 @@ public class Simulation {
 		if(spWarehouseID == -1) {
 			time = time + warehouses[nearestWareID-1].getTs();
 			warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
+			warehouses[nearestWareID-1].setLastTs(time);
 			spWarehouseID = nearestWareID;
 			spToWarehouse = nearestSP;
 		}
@@ -432,7 +434,8 @@ public class Simulation {
 			Stack<Wheelbarrow> copyWheelbarrowStack = wheelbarrowStack.clone();
 
 			for (Wheelbarrow wheelbarrow : copyWheelbarrowStack) {
-				if (wheelbarrow.getDistance() < customerDistance || wheelbarrow.getVolume() < newRequest.getN() || wheelTime >= deadline) {
+				wheelTime = calculateTime(spToWarehouse, wheelbarrow.getVelocity(), spWarehouseID - 1);
+				if (wheelbarrow.getDistance() > customerDistance && wheelbarrow.getVolume() >= newRequest.getN() && wheelTime <= deadline) {
 					findWheel = true;
 					wheel = wheelbarrow;
 					wheelbarrowStack.remove(wheelbarrow);
