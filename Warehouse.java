@@ -1,7 +1,8 @@
+import java.util.Stack;
 
 /**
  * Trida reprezentujici sklad
- * @author TR
+ * @author Tomas Rychestky
  *
  */
 public class Warehouse extends Vertex {
@@ -34,7 +35,10 @@ public class Warehouse extends Vertex {
 	 * posledni cas doplneni
 	 */
 	private double lastTs;
-	
+	/**
+	 * Zasobnik kolecek
+	 */
+	static WheelbarrowStack wheelbarrows = new WheelbarrowStack();
 	
 	/**
 	 * Konstruktor
@@ -119,5 +123,37 @@ public class Warehouse extends Vertex {
 	public int getKs() {
 		return ks;
 	}
+	
+	/**
+	 * Vrati kolecko ze zasobniku skladu
+	 * @return kolecko
+	 */
+	public Wheelbarrow popWheel() {
+		return wheelbarrows.pop();
+	}
+	
+	/**
+	 * Prida kolecko do zasobniku skladu
+	 * @param wheel vkladane kolecko
+	 */
+	public void pushWheel(Wheelbarrow wheel) {
+		wheelbarrows.push(wheel);
+	}
+	
+	/**
+	 * odstrani kolecko ze zasobniku skladu
+	 * @param wheel odstranovane kolecko
+	 */
+	public void remWheel(Wheelbarrow wheel) {
+		wheelbarrows.remove(wheel);
+	}
+	
+	public boolean emptyWheel() {
+		return wheelbarrows.isEmpty();
+	}
+	
+	 public Stack<Wheelbarrow> cloneWheel() {
+	        return wheelbarrows.clone();
+	 }
 
 }

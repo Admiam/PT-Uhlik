@@ -29,6 +29,19 @@ public class Graph {
 	   * @param distance vzdalenost
 	   */
 	  public void addEdge(int source, int destination, double distance) {
-	      neighbours[source].add(new Edge(destination, distance));
+	      neighbours[source].add(new Edge(destination, distance, source));
 	  }
+	  
+	  /**
+	     * Metoda pro výpis grafu
+	     */
+	    public void printGraph() {
+	        for (int i = 0; i < neighbours.length; i++) {
+	            System.out.print("Vrchol " + i + " sousedí s: ");
+	            for (Edge edge : neighbours[i]) {
+	                System.out.print(edge.dest + "(" + edge.distance + ") ");
+	            }
+	            System.out.println();
+	        }
+	    }
 }
