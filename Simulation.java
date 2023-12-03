@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -11,7 +10,7 @@ import java.util.Stack;
 
 /**
  * Trida pravadejici simulaci
- * @author TR
+ * @author Tomas Rychetsky / adam mika
  *
  */
 public class Simulation {
@@ -40,10 +39,6 @@ public class Simulation {
 	 * pole zakazniku
 	 */
 	static Customer[] customers;
-	/**
-	 * pole cest
-	 */
-//	static Path[] paths;
 	/**
 	 * pole druhu kolecek
 	 */
@@ -88,58 +83,37 @@ public class Simulation {
 	 * Fronta pozadavku
 	 */
 	private static PriorityQueue<Request> requestQ;
-	/**
-	 * Zasobnik kolecek
-	 */
-	//static WheelbarrowStack wheelbarrowStack = new WheelbarrowStack();
+
+	
 	/**
 	 * Hlavni metoda spoustejici program
 	 * 
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args){
 
 		Input input = new Input();
 		input.setInput("data/middleS.txt");
 		input.read();
 
-		/*
-		 * Vytvoreni objektu z vstupnich dat
-		 */
-		
+		// Vytvoreni objektu z vstupnich dat	
 		createObjects(input.getOutput());
 
-		//TODO zde udelat prioritni frontu pozadavku podle casu prichodu
-		//while neni prazdna bude se prochazet prijmani a plneni pozadavku
 		
+		//Zacatek simulace 
 		if(requestQ.isEmpty()) {
 			System.out.println("Nejsou zadne pozadavky");
 		}
 
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 
 		startRequest();
 
 		stats();
-		long stop = System.currentTimeMillis();
+		//long stop = System.currentTimeMillis();
 		//isCervenkaHappy(start, stop);
 		
-/*		
-		if (requests != null && requests[indexP] != null) {
-				arrivedRequest(requests[indexP]);
-				
-				if (wheelVerification(requests[indexP])) {
-	
-					travelling(requests[indexP]);
-					
-					stats();
-				}	
-		}
-		else {
-			System.out.println("Nejsou zadne pozadavky");
-		}
-*/
 	}
 
 	/**
@@ -321,7 +295,9 @@ public class Simulation {
 				e.printStackTrace();
 			}
 		}
-		if(count == 0) requests = new Request[1];
+		if(count == 0) {
+			requests = new Request[1];
+		}
 	}
 
 
@@ -387,11 +363,13 @@ public class Simulation {
 			if(i <= warehouses.length) {
 				if(distances[i] < spToWarehouse) {
 					if((int)time != 0) {
-//TODO opravit povitani plneni skladu
-						warehouses[i-1].setBc(((int)(time-warehouses[i-1].getLastTs())*warehouses[i-1].getKs()+warehouses[i-1].getBc()));
+						//Doplnovani skladu
+						int restock = warehouses[i-1].getKs();
+						double lastR = time-warehouses[i-1].getLastTs();
+						int mul = ((int)(lastR/warehouses[i-1].getTs()));
+						warehouses[i-1].setBc(warehouses[i-1].getBc()+(mul*restock));
 						warehouses[i-1].setLastTs(time);
 					}
-					//warehouses[i-1].setBc((int)(time%warehouses[i-1].getLastTs())*warehouses[i-1].getKs());
 					if(warehouses[i-1].getBc() >= newRequest.getN()) {
 						spToWarehouse = distances[i];
 						spWarehouseID = i;
@@ -411,6 +389,7 @@ public class Simulation {
 			return false;
 		}
 		if(spWarehouseID == -1) {
+			//TODO cekat dokud neni dost
 			time = time + warehouses[nearestWareID-1].getTs();
 			warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
 			warehouses[nearestWareID-1].setLastTs(time);
@@ -437,25 +416,33 @@ public class Simulation {
 			return false;
 		}
 		//////////////////
-		//int falseC = 0;
 		boolean findWheel = false;
 
 		//TODO vyslani vice kolecek pokud to nezvladne nalozit 1 ----- pravdepodobne spis poslani tam jednoho co se pak vrati a pojede tam znova
 
-		//TODO opravy a poskozeni kolecek
-		
 		//Vybrani/vytvoreni vhodneho kolecka pro splneni pozadavku
 		if(!warehouses[spWarehouseID - 1].emptyWheel()) {
 
 			Stack<Wheelbarrow> copyWheelbarrowStack = warehouses[spWarehouseID - 1].cloneWheel();
 
 			for (Wheelbarrow wheelbarrow : copyWheelbarrowStack) {
-				wheelTime = calculateTime(spToWarehouse, wheelbarrow.getVelocity(), spWarehouseID - 1);
-				if (wheelbarrow.getDistance() >= customerDistance && wheelbarrow.getVolume() >= newRequest.getN() && wheelTime <= deadline) {
-					findWheel = true;
-					wheel = wheelbarrow;
-					warehouses[spWarehouseID - 1].remWheel(wheelbarrow);
-					break;
+				//kontrola jestli je uz opravene
+				if(wheelbarrow.getTr() <= time) {
+					//pokud jo nastavim
+					if(wheelbarrow.getRepairing()) {
+						wheelbarrow.setRepairing(false, -1);
+						wheelbarrow.setDcurrent(wheelbarrow.getDistance(),true);
+					}
+					wheelTime = calculateTime(spToWarehouse, wheelbarrow.getVelocity(), spWarehouseID - 1);
+					if (wheelbarrow.getDistance() >= customerDistance && wheelbarrow.getVolume() >= newRequest.getN() && wheelTime <= deadline) {
+						findWheel = true;
+						wheel = wheelbarrow;
+						warehouses[spWarehouseID - 1].remWheel(wheelbarrow);
+						break;
+					}
+				}
+				else {
+					System.out.println("kolecko id: "+wheelbarrow.getID()+" se opravuje");
 				}
 			}
 		} 
@@ -475,10 +462,13 @@ public class Simulation {
 		}
 		/////////////////////////////////////////////////////
 		
-		//TODO vypocitat kolik pytlu se odvazi
-		
-		//Nalozeni pytlu
-		warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
+		//Nalozeni pytlu - pokud pozadavek vetsi nez kolecko odecte objem kolecka, jinak odecte objem pozadavku
+		if(wheel.getVolume() <= newRequest.getN()) {
+			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
+		}
+		else {
+			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-newRequest.getN());
+		}
 		System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
 		
 		
@@ -547,6 +537,16 @@ public class Simulation {
 		//navraceni do skladu a vraceni kolecka do zasobniku
 		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
 		warehouses[spWarehouseID - 1].pushWheel(wheel);
+		//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
+		wheel.setDcurrent((distances[spWarehouseID]*2),false);
+		System.out.println(wheel.getDcurrent());
+		if(requestQ.peek() != null) {
+			int nextCustomer = requestQ.peek().getID();
+			if(wheel.getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
+				wheel.setRepairing(true, time);
+			}
+		}
+		
 		System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
 		return true;
 	}
@@ -646,6 +646,11 @@ public class Simulation {
 		System.out.println("Celkem obslouzeno pozadavku: "+totalSRequests+" a doruceno celkem "+totalBags+" pytlu.");
 	}
 	
+	/**
+	 * Metoda provadejici prevedeni grafu na minimalni kostru pomoci Prim-Jranikova algoritmu
+	 * @param graph vstupni graf
+	 * @return graf minimalni kostry vstupniho grafu
+	 */
 	public static Graph primMST(Graph graph) {
         int vertices = graph.neighbours.length;
         Graph minimumSpanningTreeGraph = new Graph(vertices);
@@ -664,9 +669,6 @@ public class Simulation {
             Edge currentEdge = priorityQueue.poll();
             int currentVertex = currentEdge.dest;
 
-            // Před přidáním hrany do minimální kostry
-       //     System.out.println("Před přidáním hrany: " + currentEdge.dest + " -> " + currentVertex);
-
             // Přidání hrany do minimální kostry, pokud vrchol ještě není v ní obsažen
             if (!inMinimumSpanningTree[currentVertex]) {
                 minimumSpanningTreeGraph.addEdge(currentEdge.source, currentEdge.dest, currentEdge.distance);
@@ -680,13 +682,6 @@ public class Simulation {
                         priorityQueue.add(neighbor);
                     }
                 }
-
-                // Po přidání hrany do minimální kostry
-          //      System.out.println("Po přidání hrany: " + currentEdge.dest + " -> " + currentVertex);
-
-                // Vytiskněte aktuální stav minimální kostry
-          //      System.out.print("Minimální kostra (dočasná): ");
-          //      minimumSpanningTreeGraph.printGraph();
             }
         }
 
@@ -698,19 +693,19 @@ public class Simulation {
 	 */
 	public static void isCervenkaHappy(long start, long stop){
 		long time = (stop - start) / 60000;
-		if (time > 20)
+		if (time > 20) {
 			System.out.println("Cervenka je smutny, protoze program bezi "+time+" minut\n" + "_$$$$$__ __$$$___ $$$$$___ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
 																								"$$___$$_ _$$_$$__ $$__$$__ ___$$____ $$______ $$___$$_ $$___$$_ $$______ $$$__$$_ $$__$$__ _$$_$$__\n" +
 																								"_$$$____ $$___$$_ $$___$$_ __$$_____ $$$$$___ $$___$$_ _$$_$$__ $$$$$___ $$$$_$$_ $$$$$___ $$___$$_\n" +
 																								"___$$$__ $$$$$$$_ $$___$$_ __$$_____ $$______ $$$$$$__ _$$_$$__ $$______ $$_$$$$_ $$__$$__ $$$$$$$_\n" +
 																								"$$___$$_ $$___$$_ $$__$$__ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
-																								"_$$$$$__ $$___$$_ $$$$$___ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");
-		else
+																								"_$$$$$__ $$___$$_ $$$$$___ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");}
+		else {
 			System.out.println("Cervenka je stastny, protoze program bezi jen "+time+" minut a neco drobneho\n" + "$$___$$_ __$$$___ $$$$$$__ $$$$$$__ $$____$$_ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
 																									"$$___$$_ _$$_$$__ $$___$$_ $$___$$_ _$$__$$__ ___$$____ $$______ $$___$$_ $$___$$_ $$______ $$$__$$_ $$__$$__ _$$_$$__\n" +
 																									"$$$$$$$_ $$___$$_ $$___$$_ $$___$$_ __$$$$___ __$$_____ $$$$$___ $$___$$_ _$$_$$__ $$$$$___ $$$$_$$_ $$$$$___ $$___$$_\n" +
 																									"$$___$$_ $$$$$$$_ $$$$$$__ $$$$$$__ ___$$____ __$$_____ $$______ $$$$$$__ _$$_$$__ $$______ $$_$$$$_ $$__$$__ $$$$$$$_\n" +
 																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
-																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");
+																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");}
 	}
 }

@@ -62,6 +62,19 @@ public class Wheelbarrow {
 	 * random generator
 	 */
 	private Random rd = new Random();
+	/**
+	 * aktualni dojezd
+	 */
+	private double dcurrent;
+	/**
+	 * opravuje se
+	 */
+	private boolean repairing;
+	/**
+	 * cas do konce opravy
+	 */
+	private double tr;
+	
 	
 	/**
 	 * Konstrktor pro vytvoreni typu kolecka
@@ -86,6 +99,10 @@ public class Wheelbarrow {
 		this.id = 0;
 		this.velocity = 0;
 		this.distance = 0;
+		this.repairing = false;
+		this.dcurrent = 0;
+		this.tr = Double.MAX_VALUE;
+		
 	}
 	/**
 	 * Metoda vypisujici jmeno kolecka
@@ -113,6 +130,9 @@ public class Wheelbarrow {
 		this.pd = -1;
 		count++;
 		this.id = count;
+		this.repairing = false;
+		this.dcurrent = distance;
+		this.tr = -1;
 			
 	}
 
@@ -203,6 +223,62 @@ public class Wheelbarrow {
 	 */
 	public double getDMax(){
 		return dmax;
+	}
+	/**
+	 * Getter aktualni vzdalenosti
+	 * @return aktualni vzdalenost
+	 */
+	public double getDcurrent() {
+		return dcurrent;
+	}
+	/**
+	 * Setter pro nastaveni aktualni vzdalenosti
+	 * @param dcurrent hodnota vzdalenosti
+	 * @param m znacka - pokud true tak menim hodnotu, pokud false tak odecitam od aktualni hodnoty
+	 */
+	public void setDcurrent(double dcurrent, boolean m) {
+		if(m) {
+			this.dcurrent = dcurrent;
+		}
+		else {
+			this.dcurrent -= dcurrent;
+		}
+	}
+	/**
+	 * Setter pro spusteni/ukonceni opravy kolecka 
+	 * Zaporny cas slouzi pro nastaveni opravy do stavu False
+	 * @param repairing
+	 * @param time
+	 */
+	public void setRepairing(boolean repairing, double time) {
+		this.repairing = repairing;
+		if(time < 0) {
+			this.tr = time;
+		}
+		else {
+			this.tr = time+this.td;
+		}
+	}
+	/**
+	 * Getter opravy kolecka
+	 * @return true pokud se kolecko opravuje jinak false
+	 */
+	public boolean getRepairing() {
+		return this.repairing;
+	}
+	/**
+	 * Getter na cas konce opravy
+	 * @return cas konce opravy
+	 */
+	public double getTr() {
+		return tr;
+	}
+	/**
+	 * Setter na cas konce opravy
+	 * @param tr novy cas konce
+	 */
+	public void setTr(double tr) {
+		this.tr = tr;
 	}
 	
 }

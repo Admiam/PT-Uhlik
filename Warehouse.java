@@ -147,11 +147,18 @@ public class Warehouse extends Vertex {
 	public void remWheel(Wheelbarrow wheel) {
 		wheelbarrows.remove(wheel);
 	}
-	
+	/**
+	 * zjisti zda je zasobnik kolecek prazdny
+	 * @return vraci true pokud je prazdny jinak false
+	 */
 	public boolean emptyWheel() {
 		return wheelbarrows.isEmpty();
 	}
 	
+	/**
+	 * getter na ziskani zasobniku kolecek ve skladu
+	 * @return zasobnik kolecek
+	 */
 	 public Stack<Wheelbarrow> cloneWheel() {
 	        return wheelbarrows.clone();
 	 }
