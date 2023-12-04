@@ -161,7 +161,7 @@ public class Simulation {
 			createWheelbarrow(Integer.parseInt(file.readLine()));
 			createRequest(Integer.parseInt(file.readLine()));
 			
-			graph = primMST(graph);
+			graph = graph.primMST(graph);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -651,7 +651,7 @@ public class Simulation {
 	 * @param graph vstupni graf
 	 * @return graf minimalni kostry vstupniho grafu
 	 */
-	public static Graph primMST(Graph graph) {
+/*	public static Graph primMST(Graph graph) {
         int vertices = graph.neighbours.length;
         Graph minimumSpanningTreeGraph = new Graph(vertices);
 
@@ -687,11 +687,11 @@ public class Simulation {
 
         return minimumSpanningTreeGraph;
     }
-
+*/
 	/**
 	 * Metoda vypisujici informaci o spokojenosti Cervenky
 	 */
-	public static void isCervenkaHappy(long start, long stop){
+/*	public static void isCervenkaHappy(long start, long stop){
 		long time = (stop - start) / 60000;
 		if (time > 20) {
 			System.out.println("Cervenka je smutny, protoze program bezi "+time+" minut\n" + "_$$$$$__ __$$$___ $$$$$___ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
@@ -708,4 +708,5 @@ public class Simulation {
 																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
 																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");}
 	}
+*/
 }
