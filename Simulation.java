@@ -48,6 +48,10 @@ public class Simulation {
 	 */
 	static Wheelbarrow wheel;
 	/**
+	 * pole aktualnich kolecek
+	 */
+	static Wheelbarrow[] wheelArr = new Wheelbarrow[100];;
+	/**
 	 * pole pozadavku
 	 */
 	static Request[] requests;
@@ -106,13 +110,13 @@ public class Simulation {
 			System.out.println("Nejsou zadne pozadavky");
 		}
 
-		//long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 
 		startRequest();
 
 		stats();
-		//long stop = System.currentTimeMillis();
-		//isCervenkaHappy(start, stop);
+		long stop = System.currentTimeMillis();
+		isCervenkaHappy(start, stop);
 		
 	}
 
@@ -124,21 +128,36 @@ public class Simulation {
 		while (!requestQ.isEmpty()) {
 			Request current = requestQ.poll();
 			arrivedRequest(current);
-
-			if (wheelVerification(current)) {
-				if(!travelling(current)) {
+			if (!wheelVerification(current)) {
+				break; //je tu zima nebo Zíma idk...
+			}
+			if (wheel.getVolume() < current.getN()) {
+				int x = 0;
+				wheelArr[x] = wheel;
+				for (int i = 0; i < current.getN(); i += wheelArr[x].getVolume()) {
+					if (!wheelVerification(current)) {
+						break; //je tu zima nebo Zíma idk...
+					}
+					System.out.println("Pridavam kolecko do arr " + wheel.getID());
+					System.out.println("current i is " + i + " and request capacity is " + current.getN());
+					wheelArr[++x] = wheel;
+				}
+				for (int i = 0; i < wheelArr.length; i++) {
+					if (!travelling(current)) {
+						break;
+					}
+				}
+			}else{
+				if (!travelling(current)) {
 					break;
 				}
-				if (!requestQ.isEmpty()) {
-					//current = requestQ.poll();
-					//arrivedRequest(current);
-				} else {
-					break; // Nejsou requesty
-				}
 			}
-			else {
-				//umrznul zakaznik
-				break;
+
+			if (!requestQ.isEmpty()) {
+				//current = requestQ.poll();
+				//arrivedRequest(current);
+			} else {
+				break; // Nejsou requesty
 			}
 		}
 	}
@@ -445,9 +464,10 @@ public class Simulation {
 					System.out.println("kolecko id: "+wheelbarrow.getID()+" se opravuje");
 				}
 			}
-		} 
+		}
+//		 || wheel.getVolume() < newRequest.getN()
 		if (!findWheel) {
-			while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline) {
+			while (wheel.getDistance() < customerDistance || wheelTime >= deadline) {
 
 				thisWheelType = getWheelType(wheelTypes);
 				wheel = new Wheelbarrow(thisWheelType);
@@ -464,16 +484,25 @@ public class Simulation {
 		
 		//Nalozeni pytlu - pokud pozadavek vetsi nez kolecko odecte objem kolecka, jinak odecte objem pozadavku
 		if(wheel.getVolume() <= newRequest.getN()) {
-			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-wheel.getVolume());
+
+			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()- wheel.getVolume());
+//			for (int i = 0; i < newRequest.getN(); i += wheel.getVolume()) {
+//				if () {
+//				}
+//			}
+//			System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
+//			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
 		}
 		else {
 			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-newRequest.getN());
+//			System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
+//			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
+
 		}
+
 		System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
-		
-		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
-		
+
 		return true;
 		
 		}
@@ -495,60 +524,185 @@ public class Simulation {
 	 * @param current aktualni pozadavek
 	 */
 	public static boolean travelling(Request current) {
-		
-		//odjezd
-		time += warehouses[spWarehouseID-1].getTn();
-		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", odjizdi ze Sklad: "+spWarehouseID);
-		
+
 		//cesta k zakaznikovi
 		double distance = 0;
-		//KUK na kolem zakazniky
-		for(int i = 1; i < pathsFrom[current.getID()].size(); i++) {
-			Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
-			if(next instanceof Customer) {
-				distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
-				time += distance / wheel.getVelocity();
-				System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+
+		//odjezd
+		time += warehouses[spWarehouseID-1].getTn();
+		if (wheel.getVolume() < current.getN()) {
+
+			//############### Odjezd ####################
+			int z = 0;
+			for (int i = 0; i < wheelArr.length; i++) {
+				if (wheelArr[i] != null) {
+					System.out.println("Cas: " + (int) time + ", Kolecko: " + wheelArr[i].name + ", ID: " + wheelArr[i].getID() + ", odjizdi ze Sklad: " + spWarehouseID);
+				}
 			}
-		}
-		//
-		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
-		//kontrola ze dojel vcas
-		if((current.getTp()-time) < 0) {
-			System.out.println("Cas: "+(int)time+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
-			return false;
-		}
-		//doruceni
-		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+current.getN()+", Vylozeno v: "+(int)time+", Casova rezerva: "+(int)(current.getTp()-time));
-		totalBags += current.getN();
-		totalSRequests++;
-		
-		//cesta zpet do skladu
-		distance = 0;
-		//KUK na kolem zakazniky
-		for(int i = pathsFrom[current.getID()].size()-1; i >= 1; i--) {
-			Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
-			if(next instanceof Customer) {
-				distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
-				time += distance / wheel.getVelocity();
-				System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+
+			int x = 0;
+			Wheelbarrow biggerVelocity = wheelArr[x];
+
+			//############### Kuk ####################
+			for(int i = 1; i < pathsFrom[current.getID()].size(); i++) {
+				Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+				if(next instanceof Customer) {
+					distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+
+
+					for (int j = 0; j < wheelArr.length; j++) {
+
+						if (wheelArr[j] != null) {
+							System.out.println("Cas: " + (int) time + distance / wheelArr[j].getVelocity() + ", Kolecko: " + wheelArr[j].name + ", ID: " + wheelArr[j].getID() + ", Zakaznik: " + pathsFrom[current.getID()].get(i) + ", Kuk na " + wheelArr[j].name + " kolecko");
+						}
+
+						if (wheelArr[j + 1] != null && biggerVelocity.getVelocity() < wheelArr[j + 1].getVelocity()) {
+							biggerVelocity = wheelArr[j+1];
+						} else if (wheelArr[j + 1] != null) {
+							x = j;
+						}
+					}
+					time += distance / wheelArr[x].getVelocity();
+
+				}
 			}
-		}
-		//navraceni do skladu a vraceni kolecka do zasobniku
-		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
-		warehouses[spWarehouseID - 1].pushWheel(wheel);
-		//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
-		wheel.setDcurrent((distances[spWarehouseID]*2),false);
-		System.out.println(wheel.getDcurrent());
-		if(requestQ.peek() != null) {
-			int nextCustomer = requestQ.peek().getID();
-			if(wheel.getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
-				wheel.setRepairing(true, time);
+			biggerVelocity = wheelArr[0];
+			//############### Vylozeni ####################
+			for (int j = 0; j < wheelArr.length; j++) {
+
+				double tempTime = time + ((distances[spWarehouseID] - distance) / wheelArr[j].getVelocity());
+
+				//kontrola ze dojel vcas
+				if (wheelArr[j] != null && (current.getTp() - tempTime) < 0) {
+					System.out.println("Cas: "+(int)tempTime+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+					return false;
+				}else if (wheelArr[j] != null)
+					System.out.println("Cas: "+(int)tempTime+", Kolecko: "+wheelArr[j].name+", ID: "+wheelArr[j].getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+wheelArr[j].getVolume()+", Vylozeno v: "+(int)tempTime+", Casova rezerva: "+(int)(current.getTp()-tempTime));
+				if (wheelArr[j+1] == null)
+					break;
+				if (biggerVelocity.getVelocity() < wheelArr[j + 1].getVelocity() && wheelArr[j + 1] != null) {
+					biggerVelocity = wheelArr[j+1];
+				} else if (wheelArr[j + 1] != null){
+					x = j;
+				}
 			}
+			time += (distances[spWarehouseID] - distance) / wheelArr[x].getVelocity();
+
+
+			//############### Doruceni ####################
+			totalBags += current.getN();
+			totalSRequests++;
+
+
+			//############### Navrat ####################
+			distance = 0;
+			//KUK na kolem zakazniky
+			for(int i = pathsFrom[current.getID()].size()-1; i >= 1; i--) {
+				Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+				if(next instanceof Customer) {
+					distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+
+
+					for (int j = 0; j < wheelArr.length; j++) {
+
+						if (wheelArr[j] != null) {
+							System.out.println("Cas: " + (int) time + distance / wheelArr[j].getVelocity() + ", Kolecko: " + wheelArr[j].name + ", ID: " + wheelArr[j].getID() + ", Zakaznik: " + pathsFrom[current.getID()].get(i) + ", Kuk na " + wheelArr[j].name + " kolecko");
+						}
+						if (wheelArr[j] == null)
+							break;
+
+
+						if (wheelArr[j + 1] != null && biggerVelocity.getVelocity() < wheelArr[j + 1].getVelocity()) {
+							biggerVelocity = wheelArr[j+1];
+						} else if (wheelArr[j + 1] != null) {
+							x = j;
+						}
+					}
+					time += distance / wheelArr[x].getVelocity();
+
+				}
+			}
+
+			//############### Vraceni do skladu ####################
+			time += (distances[spWarehouseID] - distance) / wheelArr[x].getVelocity();
+			for (int j = 0; j < wheelArr.length; j++) {
+				if (wheelArr[j] != null) {
+					warehouses[spWarehouseID - 1].pushWheel(wheelArr[j]);
+					//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
+					wheelArr[j].setDcurrent((distances[spWarehouseID]*2),false);
+					System.out.println(wheelArr[j].getDcurrent());
+					if (wheelArr[j] == null)
+						break;
+
+					if(requestQ.peek() != null) {
+						int nextCustomer = requestQ.peek().getID();
+						if(wheelArr[j].getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
+							wheelArr[j].setRepairing(true, time);
+						}
+					}
+					System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheelArr[j].name+", ID: "+wheelArr[j].getID()+", Navrat do skladu: "+spWarehouseID);
+
+				}
+
+			}
+			return true;
+
+		}else{
+
+//odjezd
+			time += warehouses[spWarehouseID-1].getTn();
+			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", odjizdi ze Sklad: "+spWarehouseID);
+
+			//cesta k zakaznikovi
+			distance = 0;
+			//KUK na kolem zakazniky
+			for(int i = 1; i < pathsFrom[current.getID()].size(); i++) {
+				Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+				if(next instanceof Customer) {
+					distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+					time += distance / wheel.getVelocity();
+					System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+				}
+			}
+			//
+			time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+			//kontrola ze dojel vcas
+			if((current.getTp()-time) < 0) {
+				System.out.println("Cas: "+(int)time+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+				return false;
+			}
+			//doruceni
+			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+current.getN()+", Vylozeno v: "+(int)time+", Casova rezerva: "+(int)(current.getTp()-time));
+			totalBags += current.getN();
+			totalSRequests++;
+
+			//cesta zpet do skladu
+			distance = 0;
+			//KUK na kolem zakazniky
+			for(int i = pathsFrom[current.getID()].size()-1; i >= 1; i--) {
+				Vertex next = vertices[pathsFrom[current.getID()].get(i)-1];
+				if(next instanceof Customer) {
+					distance = dijkstra(graph, spWarehouseID, pathsFrom[current.getID()].get(i));
+					time += distance / wheel.getVelocity();
+					System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+pathsFrom[current.getID()].get(i)+", Kuk na "+wheel.name+" kolecko");
+				}
+			}
+			//navraceni do skladu a vraceni kolecka do zasobniku
+			time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+			warehouses[spWarehouseID - 1].pushWheel(wheel);
+			//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
+			wheel.setDcurrent((distances[spWarehouseID]*2),false);
+			System.out.println(wheel.getDcurrent());
+			if(requestQ.peek() != null) {
+				int nextCustomer = requestQ.peek().getID();
+				if(wheel.getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
+					wheel.setRepairing(true, time);
+				}
+			}
+
+			System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
+			return true;
 		}
-		
-		System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
-		return true;
 	}
 	
 	/**
@@ -691,7 +845,7 @@ public class Simulation {
 	/**
 	 * Metoda vypisujici informaci o spokojenosti Cervenky
 	 */
-/*	public static void isCervenkaHappy(long start, long stop){
+	public static void isCervenkaHappy(long start, long stop){
 		long time = (stop - start) / 60000;
 		if (time > 20) {
 			System.out.println("Cervenka je smutny, protoze program bezi "+time+" minut\n" + "_$$$$$__ __$$$___ $$$$$___ ____$$$$_ $$$$$$$_ $$$$$$__ $$___$$_ $$$$$$$_ $$___$$_ $$___$$_ __$$$___\n" +
@@ -708,5 +862,4 @@ public class Simulation {
 																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ___$$____ $$______ $$___$$_ __$$$___ $$______ $$__$$$_ $$___$$_ $$___$$_\n" +
 																									"$$___$$_ $$___$$_ $$______ $$______ ___$$____ ____$$$$_ $$$$$$$_ $$___$$_ ___$____ $$$$$$$_ $$___$$_ $$___$$_ $$___$$_");}
 	}
-*/
 }
