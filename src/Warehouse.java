@@ -56,7 +56,7 @@ public class Warehouse extends Vertex {
 		this.ks = ks;
 		this.ts = ts;
 		this.tn = tn;
-		this.lastTs = 1;
+		this.lastTs = 0;
 		this.bc = ks;
 	}
 	

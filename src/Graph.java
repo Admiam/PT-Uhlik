@@ -50,6 +50,9 @@ public class Graph {
 		 */
 		public Graph primMST(Graph graph) {
 	        int vertices = graph.neighbours.length;
+	        if(vertices == 1) {
+	        	return graph;
+	        }
 	        Graph graphMST = new Graph(vertices);
 
 	        //prioritni fronta na hrany

@@ -54,10 +54,8 @@ public class Input {
 						i = comment(i)+1;
 					}
 					if(i < sLine.length && !sLine[i].isEmpty()) {
-					//	if(!sLine[i].isEmpty()) {
 							outputData.write(sLine[i]);
 							outputData.newLine();
-					//	}
 					}
 				}	
 			}
@@ -76,36 +74,37 @@ public class Input {
 	 */
 	public int comment(int index) {
 		
+		int curInd = index;
+		
 		CharSequence start = "❄";
 		CharSequence end = "⛏";
 		
-		if(!(index >= (sLine.length-1))) {
-			index++; 
+		if(!(curInd >= (sLine.length-1))) {
+			curInd++; 
 		}
-		while(!sLine[index].contains(end)) {
-			if(sLine[index].contains(start)) {
-				index = comment(index)+1;
+		while(!sLine[curInd].contains(end)) {
+			if(sLine[curInd].contains(start)) {
+				curInd = comment(curInd)+1;
 			}
-			index++;
-			if(index > (sLine.length-1)) {
+			curInd++;
+			if(curInd > (sLine.length-1)) {
 				try {
 					if((line = inputData.readLine()) != null) {
 						line =  line.replaceAll("\\s+", " ");
 						line = line.replaceAll("❄", " ❄ ");
 						line = line.replaceAll("⛏", " ⛏ ");
 						sLine = line.split(" ");
-						index = 0;
+						curInd = 0;
 					}
 					else {
-						return index;
+						return curInd;
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
-		return index;
+		return curInd;
 	}
 	
 	/**

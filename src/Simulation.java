@@ -106,13 +106,11 @@ public class Simulation {
 		createObjects(input.getOutput());
 
 		
-		//Zacatek simulace 
-		if(requestQ.isEmpty()) {
-			System.out.println("Nejsou zadne pozadavky");
+		//Zacatek simulace
+		if(requestQ != null) {
+			startRequest();
+			stats();
 		}
-
-		startRequest();
-		stats();
 		sc.close();
 	}
 
@@ -149,11 +147,8 @@ public class Simulation {
 					break;
 				}
 			}
-
-			if (requestQ.isEmpty()) {
-				break; // Nejsou requesty
-			} 
 		}
+		 
 	}
 
 	/**
@@ -294,19 +289,24 @@ public class Simulation {
 	 */
 	public static void createRequest(int count) {
 		Request newR;
-		requestQ = new PriorityQueue<>(count, Comparator.comparingDouble(request -> request.getTz()));
-		for (int i = 0; i < count; i++) {
-			try {
-				newR = new Request(
-						Double.parseDouble(file.readLine()),
-						Integer.parseInt(file.readLine()),
-						Integer.parseInt(file.readLine()),
-						Double.parseDouble(file.readLine()));
-				requestQ.add(newR);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if(count != 0) {
+			requestQ = new PriorityQueue<>(count, Comparator.comparingDouble(request -> request.getTz()));
+			for (int i = 0; i < count; i++) {
+				try {
+					newR = new Request(
+							Double.parseDouble(file.readLine()),
+							Integer.parseInt(file.readLine()),
+							Integer.parseInt(file.readLine()),
+							Double.parseDouble(file.readLine()));
+					requestQ.add(newR);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+		}
+		else {
+			System.out.println("Nejsou zadne pozadavky");
 		}
 	}
 
@@ -359,62 +359,14 @@ public class Simulation {
 		//urceni vzdalenosti
 		distances = graph.dijkstra(graph, warehouses.length+newRequest.getID());
 		
-		chooseWarehouse(newRequest);
-		
-		/////////////////////////////////////////////////////////////
-/*		double spToWarehouse = Double.MAX_VALUE;
-		spWarehouseID = -1;
-		
-		double nearestSP = Double.MAX_VALUE;
-		int nearestWareID = -1;
-		
-		int badWarehouse = 0;
-		
-		//urceni nejvhodnejsiho skladu
-		for(int i = 0; i < distances.length; i++) {
-			if(i <= warehouses.length && distances[i] < spToWarehouse) {
-					if((int)time != 0) {
-						//Doplnovani skladu
-						int restock = warehouses[i-1].getKs();
-						double lastR = time-warehouses[i-1].getLastTs();
-						int mul = ((int)(lastR/warehouses[i-1].getTs()));
-						warehouses[i-1].setBc(warehouses[i-1].getBc()+(mul*restock));
-						warehouses[i-1].setLastTs(time);
-					}
-					if(warehouses[i-1].getBc() >= newRequest.getN()) {
-						spToWarehouse = distances[i];
-						spWarehouseID = i;
-					}
-					nearestWareID = i;
-					nearestSP = distances[i];
-					
-					if(warehouses[i-1].getKs() <= 0) {
-						 badWarehouse++;
-					}
-			}
-		}
-		if(spWarehouseID == -1 && badWarehouse == warehouses.length) {
-			System.out.println("Zadny sklad nema dostatek pytlu pro obslouzeni zakaznika");
-			System.out.println("Cas: "+(int)newRequest.getTp()+", Zakaznik "+newRequest.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+		if(!chooseWarehouse(newRequest)) {
 			return false;
 		}
-		if(spWarehouseID == -1) {
-			//cekam dokud nemam dost pytlu
-			while(warehouses[nearestWareID-1].getBc() < newRequest.getN()) {
-				time = time + warehouses[nearestWareID-1].getTs();
-				warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
-				warehouses[nearestWareID-1].setLastTs(time);
-			}
-			spWarehouseID = nearestWareID;
-			spToWarehouse = nearestSP;
-		}
-		/////////////////////////////////////////////////////////////////////
-*/
+		
 		double customerDistance = spToWarehouse * 2;
 		double deadline = newRequest.getTz() + newRequest.getTp();
 		double wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID-1);
-		
-		
+			
 		//Kontrola druhu kolecek
 		int wrCount = 0;
 		for(int i = 0; i <wheelTypes.length; i ++) {
@@ -433,69 +385,20 @@ public class Simulation {
 		//TODO vyslani vice kolecek pokud to nezvladne nalozit 1 ----- pravdepodobne spis poslani tam jednoho co se pak vrati a pojede tam znova
 
 		//Vybrani/vytvoreni vhodneho kolecka pro splneni pozadavku
-		if(!warehouses[spWarehouseID - 1].emptyWheel()) {
-			
+		if(!warehouses[spWarehouseID - 1].emptyWheel()) {		
 			findWheel = stackSearch(customerDistance, newRequest.getN(), deadline, wheelTime);
-/*
-			Stack<Wheelbarrow> copyWheelbarrowStack = warehouses[spWarehouseID - 1].cloneWheel();
-
-			for (Wheelbarrow wheelbarrow : copyWheelbarrowStack) {
-				//kontrola jestli je uz opravene
-				if(wheelbarrow.getTr() <= time) {
-					//pokud jo nastavim
-					if(wheelbarrow.getRepairing()) {
-						wheelbarrow.setRepairing(false, -1);
-						wheelbarrow.setDcurrent(wheelbarrow.getDistance(),true);
-					}
-					wheelTime = calculateTime(spToWarehouse, wheelbarrow.getVelocity(), spWarehouseID - 1);
-					if (wheelbarrow.getDistance() >= customerDistance && wheelbarrow.getVolume() >= newRequest.getN() && wheelTime <= deadline) {
-						findWheel = true;
-						wheel = wheelbarrow;
-						warehouses[spWarehouseID - 1].remWheel(wheelbarrow);
-						break;
-					}
-				}
-				else {
-					System.out.println("Cas: "+(int)time+", Kolecko: "+wheelbarrow.name+", ID: "+wheelbarrow.getID()+", vyzaduje udrzbu, Pokracovani mozne v: "+(int)wheelbarrow.getTr());
-					//System.out.println("kolecko id: "+wheelbarrow.getID()+" se opravuje");
-				}
-			}
-			*/
 		}
 		if (!findWheel) {
 			usefullWheel(customerDistance, newRequest.getN(), deadline, wheelTime);
-	/*		while (wheel.getDistance() < customerDistance || wheel.getVolume() < newRequest.getN() || wheelTime >= deadline) {
-
-				thisWheelType = getWheelType(wheelTypes);
-				wheel = new Wheelbarrow(thisWheelType);
-				warehouses[spWarehouseID - 1].pushWheel(wheel);
-
-				wheelTime = calculateTime(spToWarehouse, wheel.getVelocity(), spWarehouseID - 1);
-
-			}
-			if (!warehouses[spWarehouseID - 1].emptyWheel()) {
-				warehouses[spWarehouseID - 1].popWheel().printID();
-			}
-	*/
 		}
 		/////////////////////////////////////////////////////
 		
 		//Nalozeni pytlu - pokud pozadavek vetsi nez kolecko odecte objem kolecka, jinak odecte objem pozadavku
 		if(wheel.getVolume() <= newRequest.getN()) {
-
 			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()- wheel.getVolume());
-//			for (int i = 0; i < newRequest.getN(); i += wheel.getVolume()) {
-//				if () {
-//				}
-//			}
-//			System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
-//			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
 		}
 		else {
 			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-newRequest.getN());
-//			System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
-//			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
-
 		}
 
 		System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
@@ -587,14 +490,14 @@ public class Simulation {
 		//urceni nejvhodnejsiho skladu
 		for(int i = 0; i < distances.length; i++) {
 			if(i <= warehouses.length && distances[i] < spToWarehouse) {
-					if((int)time != 0) {
+				//	if((int)time != 0) {
 						//Doplnovani skladu
 						int restock = warehouses[i-1].getKs();
 						double lastR = time-warehouses[i-1].getLastTs();
 						int mul = ((int)(lastR/warehouses[i-1].getTs()));
 						warehouses[i-1].setBc(warehouses[i-1].getBc()+(mul*restock));
 						warehouses[i-1].setLastTs(time);
-					}
+				//	}
 					if(warehouses[i-1].getBc() >=  current.getN()) {
 						spToWarehouse = distances[i];
 						spWarehouseID = i;
@@ -607,20 +510,27 @@ public class Simulation {
 					}
 			}
 		}
-		if(spWarehouseID == -1 && badWarehouse == warehouses.length) {
-			System.out.println("Zadny sklad nema dostatek pytlu pro obslouzeni zakaznika");
+	/*	if(spWarehouseID == -1 && badWarehouse == warehouses.length) {
+			System.out.println("Zadny sklad neni shcopen doplnit dostatek pytlu pro obslouzeni zakaznika");
 			System.out.println("Cas: "+(int) current.getTp()+", Zakaznik "+ current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
 			return false;
-		}
+		}*/
 		if(spWarehouseID == -1) {
-			//cekam dokud nemam dost pytlu
-			while(warehouses[nearestWareID-1].getBc() <  current.getN()) {
-				time = time + warehouses[nearestWareID-1].getTs();
-				warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
-				warehouses[nearestWareID-1].setLastTs(time);
+			if(badWarehouse == warehouses.length) {
+				//spatne sklady napr Strange soubory
+				System.out.println("Zadny sklad neni shcopen doplnit dostatek pytlu pro obslouzeni zakaznika");
+				System.out.println("Cas: "+(int) current.getTp()+", Zakaznik "+ current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+				return false;
+			}else {
+				//cekam dokud nemam dost pytlu
+				while(warehouses[nearestWareID-1].getBc() <  current.getN()) {
+					time = time + warehouses[nearestWareID-1].getTs();
+					warehouses[nearestWareID-1].setBc(warehouses[nearestWareID-1].getBc()+warehouses[nearestWareID-1].getKs());
+					warehouses[nearestWareID-1].setLastTs(time);
+				}
+				spWarehouseID = nearestWareID;
+				spToWarehouse = nearestSP;
 			}
-			spWarehouseID = nearestWareID;
-			spToWarehouse = nearestSP;
 		}
 		return true;
 		/////////////////////////////////////////////////////////////////////
@@ -819,52 +729,6 @@ public class Simulation {
 //		}
 	}
 	
-	/**
-	 * dijkstruv algoritmus pro nalezeni cesty z jednoho bodu do vsech ostatnich
-	 * @param graph graf nad kterym je algoritmus provaden
-	 * @param startVertex pocatecni vrchol
-	 * @return vraci pole vzdalenosti od vstupniho vrcholu
-	 */
-/*	public static double[] dijkstra(Graph graph, int startVertex) {
-		 int vertices = graph.neighbours.length;
-
-	        Queue<Edge> priorityQueue = new PriorityQueue<>(vertices, Comparator.comparingDouble(edge -> edge.distance));
-	        distances = new double[vertices];
-	        pathsFrom = new ArrayList[vertices];
-
-	        for (int i = 0; i < vertices; i++) {
-	            distances[i] = Double.POSITIVE_INFINITY;
-	            pathsFrom[i] = new ArrayList<>();
-	        }
-
-	        distances[startVertex] = 0;
-	        priorityQueue.add(new Edge(startVertex, 0, -1)); 
-
-	        while (!priorityQueue.isEmpty()) {
-	            Edge currentEdge = priorityQueue.poll();
-	            int start = currentEdge.dest;
-
-	            for (Edge neighbour : graph.neighbours[start]) {
-	                int next = neighbour.dest;
-	                double weight = neighbour.distance;
-
-	                double newDistance = distances[start] + weight;
-	                if (newDistance < distances[next]) {
-	                    distances[next] = newDistance;
-
-	                    pathsFrom[next].clear();
-	                    pathsFrom[next].addAll(pathsFrom[start]);
-	                    pathsFrom[next].add(start);
-
-	                    priorityQueue.add(new Edge(next, newDistance, start));
-	                }
-	            }
-	        }
-
-	        return distances;
-    
-    }
-*/
 	/**
 	 * Metoda vypisujici statistiku na konci programu
 	 */
