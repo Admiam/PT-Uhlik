@@ -1,3 +1,4 @@
+package src;
 /**
  * Trida reprezentujici pozadavek
  * @author TR
@@ -8,19 +9,19 @@ public class Request {
     /**
      * cas prichodu pozadavku
      */
-    private double tz;
+    private final double tz;
     /**
      * ID zakaznika kteremu dorucujeme pozadavek
      */
-    private int customerID;
+    private final int customerID;
     /**
      * pocet pozadovanych pytlu
      */
-    private int n;
+    private final int n;
     /**
      * doba do ktere musi byt pozadavek vyrizen
      */
-    private double tp;
+    private final double tp;
 
     /**
      * Konstruktor

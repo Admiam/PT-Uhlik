@@ -1,4 +1,4 @@
-
+package src;
 /**
  * Trida reprezentujici vrcholy grafu
  * @author TR

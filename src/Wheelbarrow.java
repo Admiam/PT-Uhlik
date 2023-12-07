@@ -1,3 +1,5 @@
+package src;
+
 import java.util.Random;
 
 /**
@@ -14,39 +16,39 @@ public class Wheelbarrow {
 	/**
 	 * minimalni rychlost kolecka
 	 */
-	private double vmin;
+	private final double vmin;
 	/**
 	 * maximalni rychlost kolecka
 	 */
-	private double vmax;
+	private final double vmax;
 	/**
 	 * minilani vzzdalenost potrebna pro opravu
 	 */
-	private double dmin;
+	private final double dmin;
 	/**
 	 * maximalni vzdalenost potrebna pro opravu
 	 */
-	private double dmax;
+	private final double dmax;
 	/**
 	 * doba opravy kolecka
 	 */
-	private double td;
+	private final double td;
 	/**
 	 * maximalni pocet pytlu na kolecku
 	 */
-	private int kd;
+	private final int kd;
 	/**
 	 * procentualni zastoupeni kolecka 
 	 */
-	private double pd;
+	private final double pd;
 	/**
 	 * vysledna rychlost generovaneho kolecka
 	 */
-	private double velocity;
+	private final double velocity;
 	/**
 	 * vyslednou urazenou drahu do udrzby generovaneho kolecka
 	 */
-	private double distance;
+	private final double distance;
 	
 	/**
 	 * pocet kolecek
@@ -56,12 +58,12 @@ public class Wheelbarrow {
 	/**
 	 *id  kolecka
 	 */
-	private int id;
+	private final int id;
 	
 	/**
 	 * random generator
 	 */
-	private Random rd = new Random();
+	private final Random rd = new Random();
 	/**
 	 * aktualni dojezd
 	 */
@@ -104,15 +106,7 @@ public class Wheelbarrow {
 		this.tr = Double.MAX_VALUE;
 		
 	}
-	/**
-	 * Metoda vypisujici jmeno kolecka
-	 *
-	 * @return vraci jmeno kolecka
-	 */
-	public String getName(){
-		return name;
-	}
-
+	
 	/**
 	 * Konstruktor pro vygenerovani kolecka na zaklade jeho druhu
 	 * @param type druh kolecka
@@ -128,12 +122,28 @@ public class Wheelbarrow {
 		this.td = type.td;
 		this.kd = type.kd;
 		this.pd = -1;
-		count++;
+		count();
 		this.id = count;
 		this.repairing = false;
 		this.dcurrent = distance;
 		this.tr = -1;
 			
+	}
+	
+	/**
+	 * Metoda zvysujici pocitac kolecek
+	 */
+	private void count() {
+		count++;
+	}
+	
+	/**
+	 * Metoda vypisujici jmeno kolecka
+	 *
+	 * @return vraci jmeno kolecka
+	 */
+	public String getName(){
+		return name;
 	}
 
 	/**

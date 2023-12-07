@@ -1,4 +1,4 @@
-
+package src;
 /**
  * Metoda reprezentujici hranu v grafu
  * @author TR

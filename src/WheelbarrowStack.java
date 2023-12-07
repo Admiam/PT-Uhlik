@@ -1,5 +1,8 @@
+package src;
+
+import java.util.List;
 import java.util.Stack;
-import java.util.Iterator;
+
 /**
  * Trida zasobniku na kolecka
  * @author Adam Mika
@@ -9,17 +12,17 @@ public class WheelbarrowStack {
 	/**
 	 * Zasobnik kolecek
 	 */
-    private Stack<Wheelbarrow> wheelbarrowStack;
+    private final List<Wheelbarrow> wheelbarrowStack;
     /**
      * Iterator
      */
-    private Iterator<Wheelbarrow> iterator;
+    //private Iterator<Wheelbarrow> iterator;
 
     /**
      * Konstruktor zasobniku
      */
     public WheelbarrowStack() {
-        wheelbarrowStack = new Stack<>();
+        wheelbarrowStack = new Stack<Wheelbarrow>();
     }
 
     /**
@@ -28,7 +31,7 @@ public class WheelbarrowStack {
      */
     public void push(Wheelbarrow wheel) {
         System.out.println("Wheelbarrow " + wheel.getID() + " pushed to the stack");
-        wheelbarrowStack.push(wheel);
+        ((Stack<Wheelbarrow>) wheelbarrowStack).push(wheel);
     }
 
     /**
@@ -38,7 +41,7 @@ public class WheelbarrowStack {
     public Wheelbarrow pop() {
         if (!wheelbarrowStack.isEmpty()) {
             System.out.println("Wheelbarrow popped from the stack");
-            return wheelbarrowStack.pop();
+            return ((Stack<Wheelbarrow>) wheelbarrowStack).pop();
         } else {
             System.out.println("Stack is empty. Cannot pop a wheelbarrow.");
             return null;
@@ -52,7 +55,7 @@ public class WheelbarrowStack {
     public Wheelbarrow peek() {
         if (!wheelbarrowStack.isEmpty()) {
            System.out.println("Peeking at the top wheelbarrow.");
-            return wheelbarrowStack.peek();
+            return ((Stack<Wheelbarrow>) wheelbarrowStack).peek();
         } else {
             System.out.println("Stack is empty. Cannot peek at a wheelbarrow.");
             return null;
@@ -63,7 +66,7 @@ public class WheelbarrowStack {
      * Metoda vracejici zasobnik kolecek
      */
     public Stack<Wheelbarrow> clone() {
-        return wheelbarrowStack;
+        return (Stack<Wheelbarrow>) wheelbarrowStack;
     }
 
     /**

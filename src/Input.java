@@ -1,3 +1,4 @@
+package src;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,21 +22,9 @@ public class Input {
 	 */
 	private BufferedReader inputData;
 	/**
-	 * writer na vystup dat
-	 */
-	private BufferedWriter outputData;
-	/**
 	 * aktualni radka rozdelena na jednotlive retezce
 	 */
 	private String[] sLine;
-	/**
-	 * znakova sekvence oznacujici zacatek retezce
-	 */
-	private CharSequence start = "❄";
-	/**
-	 * znakova sekvence oznacujici konec retezce
-	 */
-	private CharSequence end = "⛏";
 	/**
 	 * nazev vstupniho souboru
 	 */
@@ -45,11 +34,6 @@ public class Input {
 	 */
 	private String output = "output.txt";
 	
-	
-	public Input() {
-		
-	}
-	
 	/**
 	 * Metoda resici nacteni vstupniho souboru a jeho predzpracovani pro
 	 * ziskani dat
@@ -57,7 +41,7 @@ public class Input {
 	public void read() {		
 		try {
 			inputData = Files.newBufferedReader(Paths.get(input));
-			outputData = new BufferedWriter(new FileWriter(output));
+			BufferedWriter outputData = new BufferedWriter(new FileWriter(output));
 			while((line = inputData.readLine()) != null) {
 				//resi komentare
 				//resi odstraneni bilych znaku
@@ -66,21 +50,21 @@ public class Input {
 				line = line.replaceAll("⛏", " ⛏ ");
 				sLine = line.split(" ");
 				for(int i = 0 ; i < sLine.length ; i++) {
-					if(sLine[i].contains(start)) {
+					if(sLine[i].contains("❄")) {
 						i = comment(i)+1;
 					}
-					if(i < sLine.length) {
-						if(!sLine[i].isEmpty()) {
+					if(i < sLine.length && !sLine[i].isEmpty()) {
+					//	if(!sLine[i].isEmpty()) {
 							outputData.write(sLine[i]);
 							outputData.newLine();
-						}
+					//	}
 					}
 				}	
 			}
 			outputData.close();
+			inputData.close();
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -91,6 +75,10 @@ public class Input {
 	 * @return vraci index na kterem skoncil komentar
 	 */
 	public int comment(int index) {
+		
+		CharSequence start = "❄";
+		CharSequence end = "⛏";
+		
 		if(!(index >= (sLine.length-1))) {
 			index++; 
 		}

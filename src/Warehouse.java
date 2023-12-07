@@ -1,4 +1,6 @@
-import java.util.Stack;
+package src;
+
+import java.util.List;
 
 /**
  * Trida reprezentujici sklad
@@ -10,23 +12,23 @@ public class Warehouse extends Vertex {
 	/**
 	 * kartezske souradnic kazdeho skladu x
 	 */
-	private double x;
+	private final double x;
 	/**
 	 * kartezske souradnic kazdeho skladu y
 	 */
-	private double y;
+	private final double y;
 	/**
 	 * pocet pytlu ks, ktere jsou do skladu vzdy po uplynuti doby ts doplneny.
 	 */
-	private int ks;
+	private final int ks;
 	/**
 	 * doba doplneni zasob
 	 */
-	private double ts;
+	private final double ts;
 	/**
 	 * doba nalozeni pytlu
 	 */
-	private double tn;
+	private final double tn;
 	/**
 	 * aktualni pocet pytlu ve skladu
 	 */
@@ -159,7 +161,7 @@ public class Warehouse extends Vertex {
 	 * getter na ziskani zasobniku kolecek ve skladu
 	 * @return zasobnik kolecek
 	 */
-	 public Stack<Wheelbarrow> cloneWheel() {
+	 public List<Wheelbarrow> cloneWheel() {
 	        return wheelbarrows.clone();
 	 }
 
