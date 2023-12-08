@@ -547,8 +547,8 @@ public class Simulation {
 		double distance = 0;
 
 		//odjezd
-		time += warehouses[spWarehouseID-1].getTn();
-	/*	if (wheel.getVolume() < current.getN()) {
+	/*	time += warehouses[spWarehouseID-1].getTn();
+		if (wheel.getVolume() < current.getN()) {
 
 			//############### Odjezd ####################
 			//int z = 0;
@@ -714,7 +714,7 @@ public class Simulation {
 			//navraceni do skladu a vraceni kolecka do zasobniku
 			time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
 			warehouses[spWarehouseID - 1].pushWheel(wheel);
-			//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
+			//oprava pokud neujede vzdalenost k dalsimu pozadavku
 			wheel.setDcurrent((distances[spWarehouseID]*2),false);
 			System.out.println(wheel.getDcurrent());
 			if(requestQ.peek() != null) {
