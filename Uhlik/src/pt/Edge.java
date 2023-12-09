@@ -13,7 +13,9 @@ public class Edge {
 	 * vzdalenost od zdrojoveho vrcholu
 	 */
     double distance;
-    
+    /**
+     * startovni vrchol
+     */
     int source;
 
     /**
@@ -27,14 +29,25 @@ public class Edge {
         this.source = source;
     }
 
+    /**
+     * Getter na cilovy vrchol
+     * @return cilovy vrchol
+     */
 	public int getDest() {
 		return dest;
 	}
-
+	/**
+	 * Getter na vzdalenost vrcholu
+	 * @return
+	 */
 	public double getDistance() {
 		return distance;
 	}
 	
+	 /**
+     * Getter na startovaci vrchol
+     * @return startovaci vrchol
+     */
 	public int getsource() {
 		return source;
 	}

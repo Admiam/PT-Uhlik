@@ -14,11 +14,6 @@ public class WheelbarrowStack {
 	 */
     private final List<Wheelbarrow> wheelbarrowStack;
     /**
-     * Iterator
-     */
-    //private Iterator<Wheelbarrow> iterator;
-
-    /**
      * Konstruktor zasobniku
      */
     public WheelbarrowStack() {
@@ -30,7 +25,7 @@ public class WheelbarrowStack {
      * @param wheel vkladane kolecko
      */
     public void push(Wheelbarrow wheel) {
-        System.out.println("Wheelbarrow " + wheel.getID() + " pushed to the stack");
+        //System.out.println("Wheelbarrow " + wheel.getID() + " pushed to the stack");
         ((Stack<Wheelbarrow>) wheelbarrowStack).push(wheel);
     }
 
@@ -40,10 +35,10 @@ public class WheelbarrowStack {
      */
     public Wheelbarrow pop() {
         if (!wheelbarrowStack.isEmpty()) {
-            System.out.println("Wheelbarrow popped from the stack");
+            //System.out.println("Wheelbarrow popped from the stack");
             return ((Stack<Wheelbarrow>) wheelbarrowStack).pop();
         } else {
-            System.out.println("Stack is empty. Cannot pop a wheelbarrow.");
+           // System.out.println("Stack is empty. Cannot pop a wheelbarrow.");
             return null;
         }
     }
@@ -54,10 +49,10 @@ public class WheelbarrowStack {
      */
     public Wheelbarrow peek() {
         if (!wheelbarrowStack.isEmpty()) {
-           System.out.println("Peeking at the top wheelbarrow.");
+          // System.out.println("Peeking at the top wheelbarrow.");
             return ((Stack<Wheelbarrow>) wheelbarrowStack).peek();
         } else {
-            System.out.println("Stack is empty. Cannot peek at a wheelbarrow.");
+           // System.out.println("Stack is empty. Cannot peek at a wheelbarrow.");
             return null;
         }
     }

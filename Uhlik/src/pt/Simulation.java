@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -49,10 +51,6 @@ public class Simulation {
 	 */
 	static Wheelbarrow wheel;
 	/**
-	 * pole aktualnich kolecek
-	 */
-	static Wheelbarrow[] wheelArr = new Wheelbarrow[100];
-	/**
 	 * objekt reprezentujici graf ulohy
 	 */
 	private static Graph graph;
@@ -84,6 +82,10 @@ public class Simulation {
 	 * Fronta pozadavku
 	 */
 	private static Queue<Request> requestQ;
+	/**
+	 * list aktualnich kolecek
+	 */
+	static List<Wheelbarrow> wheelArr = new ArrayList();
 
 	
 	/**
@@ -132,27 +134,23 @@ public class Simulation {
 			if (!wheelVerification(current)) {
 				break; 
 			}
+			wheelArr.add(wheel);
 			if (wheel.getVolume() < current.getN()) {
 				int x = 0;
-				wheelArr[x] = wheel;
-				for (int i = 0; i < current.getN(); i += wheelArr[x].getVolume()) {
+				x += wheelArr.get(wheelArr.size()-1).getVolume();
+				while (x < current.getN()) {
 					if (!wheelVerification(current)) {
 						break; 
 					}
-					System.out.println("Pridavam kolecko do arr " + wheel.getID());
-					System.out.println("current i is " + i + " and request capacity is " + current.getN());
-					wheelArr[++x] = wheel;
-				}
-				for (int i = 0; i < wheelArr.length; i++) {
-					if (!travelling(current)) {
-						break;
-					}
-				}
-			}else{
-				if (!travelling(current)) {
-					break;
+					wheelArr.add(wheel);
+					x += wheelArr.get(wheelArr.size()-1).getVolume();
 				}
 			}
+			if (!travelling(current)) {
+					break;
+			}
+			//odstraneni aktulane pozivanych kolecek po splneni pozadavku
+			wheelArr.clear();
 		}
 		 
 	}
@@ -398,8 +396,7 @@ public class Simulation {
 		else {
 			warehouses[spWarehouseID-1].setBc(warehouses[spWarehouseID-1].getBc()-newRequest.getN());
 		}
-
-		System.out.println("Pytlu ve skladu po nalozeni: "+warehouses[spWarehouseID-1].getBc());
+		
 		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Sklad: "+spWarehouseID+", Nalozeno pytlu: "+wheel.getVolume()+", Odjezd v: "+(int)(time+warehouses[spWarehouseID-1].getTn()));
 
 		return true;
@@ -437,7 +434,7 @@ public class Simulation {
 
 		}
 		if (!warehouses[spWarehouseID - 1].emptyWheel()) {
-			warehouses[spWarehouseID - 1].popWheel().printID();
+			warehouses[spWarehouseID - 1].popWheel();
 		}
 	}
 	
@@ -536,70 +533,160 @@ public class Simulation {
 	}
 	
 	/**
-	 * Metoda provadejici vypisy cesty pro dany pozadavek
+	 * Metoda zajistujici cestu koelcka
 	 * @param current aktualni pozadavek
 	 */
 	public static boolean travelling(Request current) {
 
-		//cesta k zakaznikovi
-		double distance = 0;
-			//odjezd
-			time += warehouses[spWarehouseID-1].getTn();
-			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", odjizdi ze Sklad: "+spWarehouseID);
+		Collections.sort(wheelArr, Comparator.comparingDouble(wheelbarrow -> wheelbarrow.getVelocity()));
+		Collections.reverse(wheelArr);
 
-			//cesta k zakaznikovi
-			distance = 0;
-			//aktualni vrchol proverovany na kuk
-			int curVer = 0;
-			//KUK na kolem zakazniky
-			for(int i = 1; i < graph.pathsFrom[current.getID()].size(); i++) {
-				curVer = graph.pathsFrom[current.getID()].get(i);
-				Vertex next = vertices[curVer-1];
-				if(next instanceof Customer) {
-					distance = graph.dijkstra(graph, spWarehouseID, curVer);
-					time += distance / wheel.getVelocity();
-					System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+curVer+", Kuk na "+wheel.name+" kolecko");
-				}
-			}
-			//
-			time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+		time += warehouses[spWarehouseID-1].getTn();
+		if (wheelArr.get(0).getVolume() < current.getN()) {		
+			return rideTogether(current);
+		}else{
+			return rideAlone(current);
+		}
+	
+	}
+	
+	/**
+	 * Metoda zajistujici a vypisujici cestu kolecka, pokud jich jede vic k 1 zakaznikovi
+	 * @param current aktualni pozadavek
+	 * @return ture pokud uspesne dojeli jinak flase
+	 */
+	public static boolean rideTogether(Request current) {
+
+		double distance = 0;
+		
+		//############### Odjezd ####################
+		for (int i = 0; i < wheelArr.size(); i++) {
+			System.out.println("Cas: " + (int) time + ", Kolecko: " + wheelArr.get(i).name + ", ID: " + wheelArr.get(i).getID() + ", odjizdi ze Sklad: " + spWarehouseID);
+		}
+
+		//############### Kuk ####################
+		for(int i = 1; i < graph.pathsFrom[current.getID()].size(); i++) {
+			distance = kuk(current, distance, i);
+		}
+
+		//############### Vylozeni ####################
+		double tempTime = 0;
+		for (int j = 0; j < wheelArr.size(); j++) {
+			
+			tempTime = time + ((distances[spWarehouseID] - distance) / wheelArr.get(j).getVelocity());
 			//kontrola ze dojel vcas
-			if((current.getTp()-time) < 0) {
-				System.out.println("Cas: "+(int)time+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+			if ((current.getTp() - tempTime) < 0) {
+				System.out.println("Cas: "+(int)tempTime+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
 				return false;
 			}
-			//doruceni
-			System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+current.getN()+", Vylozeno v: "+(int)time+", Casova rezerva: "+(int)(current.getTp()-time));
-			totalBags += current.getN();
-			totalSRequests++;
+			
+			System.out.println("Cas: "+(int)tempTime+", Kolecko: "+wheelArr.get(j).name+", ID: "+wheelArr.get(j).getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+wheelArr.get(j).getVolume()+", Vylozeno v: "+(int)tempTime+", Casova rezerva: "+(int)(current.getTp()-tempTime));
 
-			//cesta zpet do skladu
-			distance = 0;
-			//KUK na kolem zakazniky
-			for(int i = graph.pathsFrom[current.getID()].size()-1; i >= 1; i--) {
-				curVer = graph.pathsFrom[current.getID()].get(i);
-				Vertex next = vertices[curVer-1];
-				if(next instanceof Customer) {
-					distance = graph.dijkstra(graph, spWarehouseID, curVer);
-					time += distance / wheel.getVelocity();
-					System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+curVer+", Kuk na "+wheel.name+" kolecko");
-				}
-			}
-			//navraceni do skladu a vraceni kolecka do zasobniku
-			time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
-			warehouses[spWarehouseID - 1].pushWheel(wheel);
-			//oprava pokud neujede vzdalenost k dalsimu pozadavku
-			wheel.setDcurrent((distances[spWarehouseID]*2),false);
-			System.out.println(wheel.getDcurrent());
-			if(requestQ.peek() != null) {
-				int nextCustomer = requestQ.peek().getID();
-				if(wheel.getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
-					wheel.setRepairing(true, time);
-				}
-			}
+		}
+		time = tempTime;
 
-			System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
-			return true;
+		//############### Doruceni ####################
+		totalBags += current.getN();
+		totalSRequests++;
+
+		//############### Navrat ####################
+		
+		//KUK na kolem zakazniky
+		for(int i = graph.pathsFrom[current.getID()].size()-1; i >= 1; i--) {
+			distance = kuk(current, distance, i);
+		}
+
+		//############### Vraceni do skladu ####################
+		for (int j = 0; j < wheelArr.size(); j++) {
+				tempTime = time + ((distances[spWarehouseID] - distance) / wheelArr.get(j).getVelocity());
+				warehouses[spWarehouseID - 1].pushWheel(wheelArr.get(j));
+				//oprava pokud uz dojede jen 1/3 a mene sveho puvodniho dojezdu
+				wheelArr.get(j).setDcurrent((distances[spWarehouseID]*2),false);
+
+				if(requestQ.peek() != null) {
+					int nextCustomer = requestQ.peek().getID();
+					if(wheelArr.get(j).getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
+						wheelArr.get(j).setRepairing(true, time);
+					}
+				}
+				System.out.println("Cas: "+(int)(tempTime)+", Kolecko: "+wheelArr.get(j).name+", ID: "+wheelArr.get(j).getID()+", Navrat do skladu: "+spWarehouseID);
+
+		}
+		return true;
+	}
+	
+	/**
+	 * Metoda zajistujici a vypisujici cestu kolecka, pokud jich jede samo k 1 zakaznikovi
+	 * @param current aktualni pozadavek
+	 * @return ture pokud uspesne dojelo jinak flase
+	 */
+	public static boolean rideAlone(Request current) {
+		
+		double distance = 0;
+		//odjezd
+		time += warehouses[spWarehouseID-1].getTn();
+		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", odjizdi ze Sklad: "+spWarehouseID);
+
+		//cesta k zakaznikovi
+		distance = 0;
+		//KUK na kolem zakazniky
+		for(int i = 1; i < graph.pathsFrom[current.getID()].size(); i++) {
+			distance = kuk(current, distance, i);
+		}
+		//
+		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+		//kontrola ze dojel vcas
+		if((current.getTp()-time) < 0) {
+			System.out.println("Cas: "+(int)time+", Zakaznik "+current.getID()+" umrzl zimou, protoze jezdit s koleckem je hloupost, konec");
+			return false;
+		}
+		//doruceni
+		System.out.println("Cas: "+(int)time+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Zakaznik: "+current.getID()+", Vylozeno pytlu: "+current.getN()+", Vylozeno v: "+(int)time+", Casova rezerva: "+(int)(current.getTp()-time));
+		totalBags += current.getN();
+		totalSRequests++;
+
+		//cesta zpet do skladu
+		distance = 0;
+		//KUK na kolem zakazniky
+		for(int i = graph.pathsFrom[current.getID()].size()-1; i >= 1; i--) {
+			distance = kuk(current, distance, i);
+		}
+		//navraceni do skladu a vraceni kolecka do zasobniku
+		time += (distances[spWarehouseID] - distance) / wheel.getVelocity();
+		warehouses[spWarehouseID - 1].pushWheel(wheel);
+		//oprava pokud neujede vzdalenost k dalsimu pozadavku
+		wheel.setDcurrent((distances[spWarehouseID]*2),false);
+		if(requestQ.peek() != null) {
+			int nextCustomer = requestQ.peek().getID();
+			if(wheel.getDcurrent() < ((distances[spWarehouseID]+distances[nextCustomer+warehouses.length])*2)) {
+				wheel.setRepairing(true, time);
+			}
+		}
+
+		System.out.println("Cas: "+(int)(time)+", Kolecko: "+wheel.name+", ID: "+wheel.getID()+", Navrat do skladu: "+spWarehouseID);
+		return true;
+	}
+	
+	/**
+	 * Metoda provadejici vypis KUK na zakzanika
+	 * @param current aktualni pozadavek
+	 * @param distance ujeta vzdalenost
+	 * @param index index aktualniho kontrolovaneho kolecka
+	 * @return vraci novou vzdalenost po dojeti ke KUK zakaznikovi
+	 */
+	public static double kuk(Request current, double distance, int index) {
+		double traveled = distance;
+			Vertex next = vertices[graph.pathsFrom[current.getID()].get(index)-1];
+			if(next instanceof Customer) {
+				traveled = distances[spWarehouseID] - distances[graph.pathsFrom[current.getID()].get(index)] ; //graph.dijkstra(graph, spWarehouseID, graph.pathsFrom[current.getID()].get(i));
+				double temptime = 0;
+				for (int j = 0; j < wheelArr.size(); j++) {
+						temptime = time + (traveled / wheelArr.get(j).getVelocity());
+						System.out.println("Cas: " + (int)temptime + ", Kolecko: " + wheelArr.get(j).name + ", ID: " + wheelArr.get(j).getID() + ", Zakaznik: " + (graph.pathsFrom[current.getID()].get(index)-1) + ", Kuk na " + wheelArr.get(j).name + " kolecko");
+				}
+				time = temptime;
+			}
+		return traveled;
 	}
 	
 	/**

@@ -87,49 +87,7 @@ public class Graph {
 
 	        return graphMST;
 	    }
-		
-		/**
-		 * dijkstruv algoritmus pro nalezeni cesty z jednoho bodu do druheho
-		 * @param graph graf nad kterym je algoritmus provaden
-		 * @param startVertex pocatecni vrchol
-		 * @param endVertex koncovi vrchol
-		 * @return vraci vzdalenost vrcholu v grafu
-		 */
-		public double dijkstra(Graph graph, int startVertex, int endVertex) {
-	        int vertices = graph.neighbours.length;
-	        Queue<Edge> priorityQueue = new PriorityQueue<>(vertices, Comparator.comparingDouble(edge -> edge.distance));
-	        double[] distances = new double[vertices];
-
-	        for (int i = 0; i < vertices; i++) {
-	            distances[i] = Double.MAX_VALUE;
-	        }
-
-	        distances[startVertex] = 0;
-	        priorityQueue.add(graph.neighbours[startVertex].get(0));
-
-	        while (!priorityQueue.isEmpty()) {
-	            int u = priorityQueue.poll().dest;
-
-	            if (u == endVertex) {
-	                return distances[u];
-	            }
-
-	            for (int k = 0; k < graph.neighbours[u].size(); k++) {
-	                Edge neighbour = graph.neighbours[u].get(k);
-	                int v = neighbour.dest;
-	                double weight = neighbour.distance;
-
-	                double newDistance = distances[u] + weight;
-	                if (newDistance < distances[v]) {
-	                    distances[v] = newDistance;
-	                    priorityQueue.add(new Edge(v, newDistance, u));
-	                }
-	            }
-	        }
-
-	        return -1;
-	    }
-		
+			
 		/**
 		 * dijkstruv algoritmus pro nalezeni cesty z jednoho bodu do vsech ostatnich
 		 * @param graph graf nad kterym je algoritmus provaden
