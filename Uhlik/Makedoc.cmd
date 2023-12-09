@@ -1,0 +1,1 @@
+javadoc -encoding UTF-8 -sourcepath .\src\pt -cp .\src\pt -d doc\javadoc -version -author .\src\pt\*.java
